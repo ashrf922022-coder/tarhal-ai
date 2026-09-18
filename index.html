@@ -1,397 +1,1140 @@
-<!doctype html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0f172a">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon-192.png">
-<title>ترحال AI — المنصة الذكية</title>
-<style>
-:root{font-family:system-ui,-apple-system,Segoe UI,Tahoma,Arial;background:#f1f5f9;color:#0f172a}
-*{box-sizing:border-box}body{margin:0;background:#f1f5f9}.app{max-width:760px;margin:auto;min-height:100vh}
-header{position:sticky;top:0;z-index:5;background:#0f172a;color:#fff;padding:15px 14px 11px;box-shadow:0 2px 12px #0002}
-header h1{margin:0;font-size:22px}header p{margin:4px 0 0;color:#cbd5e1;font-size:12px}
-nav{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:11px}
-nav button{border:0;border-radius:10px;padding:9px 3px;background:#1e293b;color:#cbd5e1;font-weight:800;font-size:11px}
-nav button.active{background:#fff;color:#0f172a}
-main{padding:12px}.tab{display:none}.tab.active{display:block}
-.card{background:#fff;border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 2px 10px #0000000b}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
-label{font-size:12px;color:#475569;display:block;margin-bottom:5px}
-input,select,textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px;font:inherit;background:#fff}
-textarea{min-height:95px;resize:vertical}
-.btn{border:0;border-radius:11px;padding:10px 13px;font-weight:800;cursor:pointer}.primary{background:#0f172a;color:#fff}.wa{background:#15803d;color:#fff}.light{background:#e2e8f0;color:#0f172a}.danger{background:#fee2e2;color:#991b1b}.gold{background:#fef3c7;color:#92400e}
-.row{display:flex;gap:7px;flex-wrap:wrap;align-items:center}.row>*{flex:1}
-.stat{background:#f8fafc;border-radius:12px;padding:11px;text-align:center}.stat b{font-size:22px;display:block}
-.item{border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin-top:8px}.muted{color:#64748b;font-size:12px}.tag{display:inline-block;background:#e2e8f0;border-radius:999px;padding:4px 8px;font-size:11px;margin:2px}
-h2{font-size:17px;margin:4px 0 10px}h3{font-size:14px;margin:0 0 6px}.empty{text-align:center;color:#64748b;padding:25px}
-.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;padding:10px 15px;border-radius:10px;display:none;z-index:20}
-.priority{font-weight:900}.timeline{border-right:3px solid #cbd5e1;padding-right:10px}.timeline .event{margin:0 0 10px}.kpi{font-size:12px;padding:9px;background:#f8fafc;border-radius:10px}
-@media(max-width:520px){.grid{grid-template-columns:1fr}.grid3{grid-template-columns:repeat(3,1fr)}nav button{font-size:10px}}
-</style>
-</head>
-<body>
-<div class="app">
-<header>
-<h1>ترحال AI</h1><p>منصتك الذكية لإدارة العملاء والسفر والتسويق</p>
-<nav>
-<button data-tab="dash" class="active">الرئيسية</button>
-<button data-tab="people">العملاء</button>
-<button data-tab="trips">الحجوزات</button>
-<button data-tab="ai">الذكاء</button>
-<button data-tab="hub">المركز</button>
-</nav>
-</header>
-<main>
+const KEY = "tarhal_ai_personal_v3";
 
-<section id="dash" class="tab active">
-<div class="card"><h2>لوحة اليوم</h2>
-<div class="grid3">
-<div class="stat"><b id="nPeople">0</b><span class="muted">عملاء</span></div>
-<div class="stat"><b id="nTrips">0</b><span class="muted">حجوزات</span></div>
-<div class="stat"><b id="nActions">0</b><span class="muted">إجراءات</span></div>
-</div></div>
-<div class="card"><h2>ماذا أفعل اليوم؟</h2><div id="worklist"></div></div>
-<div class="card"><h2>فرص تستحق الانتباه</h2><div id="opportunities"></div></div>
-</section>
+let old = JSON.parse(localStorage.getItem(KEY) || "{}");
 
-<section id="people" class="tab">
-<div class="card"><h2>إضافة عميل</h2>
-<div class="grid">
-<div><label>الاسم</label><input id="pName" placeholder="اسم العميل"></div>
-<div><label>نوع العميل</label><select id="pType"><option>فرد</option><option>عائلة</option><option>شركة</option><option>مؤسسة</option><option>مجموعة</option></select></div>
-<div><label>رقم واتساب</label><input id="pPhone" placeholder="9677xxxxxxxx"></div>
-<div><label>الوجهة المفضلة</label><input id="pDest" placeholder="مكة / جدة / القاهرة"></div>
-<div><label>دورة السفر بالأيام</label><input id="pCycle" type="number" value="45"></div>
-<div><label>آخر سفر</label><input id="pLast" type="date"></div>
-<div><label>تقييم الرضا</label><select id="pSat"><option value="">غير مقيم</option><option value="5">ممتاز</option><option value="4">جيد جدًا</option><option value="3">جيد</option><option value="2">يحتاج تحسين</option><option value="1">غير راضٍ</option></select></div>
-<div><label>ملاحظات</label><input id="pNotes" placeholder="معلومة مهمة عن العميل"></div>
-</div>
-<button class="btn primary" style="margin-top:10px;width:100%" onclick="addPerson()">حفظ العميل</button>
-</div>
-<div class="card"><h2>العملاء</h2><div id="peopleList"></div></div>
-</section>
+let db = {
+people: Array.isArray(old.people) ? old.people : [],
+trips: Array.isArray(old.trips) ? old.trips : []
+};
 
-<section id="trips" class="tab">
-<div class="card"><h2>تسجيل حجز</h2>
-<div class="grid">
-<div><label>العميل</label><select id="tPerson"></select></div>
-<div><label>الوجهة</label><input id="tDest" placeholder="الوجهة"></div>
-<div><label>تاريخ السفر</label><input id="tDate" type="date"></div>
-<div><label>قيمة الحجز</label><input id="tValue" type="number" value="0"></div>
-</div>
-<button class="btn primary" style="margin-top:10px;width:100%" onclick="addTrip()">تسجيل الحجز</button>
-</div>
-<div class="card"><h2>سجل الحجوزات</h2><div id="tripsList"></div></div>
-</section>
+/* =========================
+أدوات مساعدة
+========================= */
 
-<section id="ai" class="tab">
-<div class="card"><h2>اسأل ترحال</h2>
-<p class="muted">اكتب سؤالك عن العملاء أو المتابعة، وسيبني البرنامج إجابة من البيانات المحلية.</p>
-<input id="ask" placeholder="مثلاً: من يحتاج متابعة؟">
-<button class="btn primary" style="margin-top:8px;width:100%" onclick="askTarhal()">تحليل السؤال</button>
-<div id="askResult"></div>
-</div>
+function el(id) {
+return document.getElementById(id);
+}
 
-<div class="card"><h2>مساعد المتابعة الذكي</h2>
-<select id="aiPerson"></select><div id="suggestion" style="margin-top:10px"></div>
-</div>
+function save() {
+localStorage.setItem(KEY, JSON.stringify(db));
+render();
+}
 
+function toast(x) {
+let e = el("toast");
+if (!e) return;
 
-<div class="card"><h2>رسالة واتساب</h2><textarea id="msg"></textarea>
-<div class="row" style="margin-top:8px"><button class="btn wa" onclick="openWhatsApp()">فتح واتساب وإرسال</button><button class="btn light" onclick="copyMsg()">نسخ الرسالة</button></div>
-<p class="muted">الإرسال النهائي يتم منك.</p></div>
+e.textContent = x;
+e.style.display = "block";
 
-<div class="card"><h2>نسخة احتياطية</h2><div class="row">
-<button class="btn light" onclick="exportData()">تصدير البيانات</button>
-<button class="btn light" onclick="document.getElementById('file').click()">استيراد</button>
-<input id="file" type="file" accept=".json" hidden onchange="importData(event)">
-</div></div>
-</section>
- 
-<div class="card" id="designStudio">
-<h2>🎨 استوديو التصميم والتسويق الذكي</h2>
-<p class="muted">
-اختر مجال عملك، وسيتم تخصيص مساعد الذكاء الاصطناعي حسب المجال والهدف الذي تختاره.
-</p>
+setTimeout(() => {
+e.style.display = "none";
+}, 1800);
+}
 
+function esc(s) {
+return String(s ?? "").replace(
+/[&<>"']/g,
+m => ({
+"&": "&",
+"<": "<",
+">": ">",
+'"': """,
+"'": "'"
+}[m])
+);
+}
+
+/* =========================
+التنقل بين الصفحات
+========================= */
+
+document.querySelectorAll("nav button").forEach(b => {
+b.onclick = () => {
+document.querySelectorAll(".tab").forEach(x => {
+x.classList.remove("active");
+});
+
+let target = el(b.dataset.tab);
+
+if (target) {
+  target.classList.add("active");
+}
+
+document.querySelectorAll("nav button").forEach(x => {
+  x.classList.remove("active");
+});
+
+b.classList.add("active");
+
+render();
+
+};
+});
+
+/* =========================
+العملاء
+========================= */
+
+function addPerson() {
+
+let name = el("pName")?.value.trim();
+
+if (!name) {
+return toast("اكتب اسم العميل");
+}
+
+db.people.push({
+id: Date.now().toString(),
+name: name,
+type: el("pType")?.value || "",
+phone: el("pPhone")?.value.trim() || "",
+dest: el("pDest")?.value.trim() || "",
+cycle: +(el("pCycle")?.value) || 45,
+last: el("pLast")?.value || "",
+sat: el("pSat")?.value ? +(el("pSat")?.value) : null,
+notes: el("pNotes")?.value.trim() || "",
+created: new Date().toISOString(),
+
+events: [
+  {
+    date: new Date().toISOString(),
+    text: "تمت إضافة العميل"
+  }
+]
+
+});
+
+["pName", "pPhone", "pDest", "pNotes"].forEach(id => {
+if (el(id)) {
+el(id).value = "";
+}
+});
+
+save();
+toast("تم حفظ العميل");
+}
+
+/* =========================
+الحجوزات
+========================= */
+
+function addTrip() {
+
+let person = el("tPerson");
+
+if (!person || !person.value) {
+return toast("اختر العميل");
+}
+
+let t = {
+id: Date.now().toString(),
+personId: person.value,
+dest: el("tDest")?.value.trim() || "",
+date: el("tDate")?.value || "",
+value: +(el("tValue")?.value) || 0
+};
+
+db.trips.push(t);
+
+let p = db.people.find(x => x.id === person.value);
+
+if (p) {
+
+p.last = t.date || p.last;
+p.dest = t.dest || p.dest;
+p.events = p.events || [];
+
+p.events.push({
+  date: new Date().toISOString(),
+  text: `تم تسجيل حجز إلى ${p.dest || t.dest || "وجهة غير محددة"}`
+});
+
+}
+
+["tDest", "tDate", "tValue"].forEach(id => {
+if (el(id)) {
+el(id).value = "";
+}
+});
+
+save();
+toast("تم تسجيل الحجز");
+}
+
+/* =========================
+تحليل العملاء
+========================= */
+
+function daysSince(s) {
+
+if (!s) return 9999;
+
+return Math.floor(
+(Date.now() - new Date(s + "T00:00:00")) / 86400000
+);
+}
+
+function daysUntilDue(p) {
+return (p.cycle || 45) - daysSince(p.last);
+}
+
+function inactiveDays(p) {
+return Math.max(0, daysSince(p.last));
+}
+
+function reason(p) {
+
+if (!p.last) {
+return {
+level: "متابعة أولية",
+txt: "لا يوجد تاريخ سفر سابق؛ اجمع معلومة عن الخطة القادمة."
+};
+}
+
+let d = daysUntilDue(p);
+
+if (d <= 0) {
+return {
+level: "أولوية عالية",
+txt: "حان موعد المتابعة المتوقع حسب دورة العميل."
+};
+}
+
+if (d <= 7) {
+return {
+level: "أولوية",
+txt: "اقترب موعد المتابعة المتوقع."
+};
+}
+
+return {
+level: "مراقبة",
+txt: "ما زال أمام موعد المتابعة المتوقع عدة أيام."
+};
+}
+
+/* =========================
+رسائل العملاء
+========================= */
+
+function makeMessage(p) {
+
+if (!p.last) {
+return "السلام عليكم ${p.name}، معك ترحال. حبيت أتابع معك وأعرف إذا عندك رحلة قريبة${p.dest ? " إلى ${p.dest}" : ""} أو أي حجز تحتاج نساعدك فيه.";
+}
+
+if (daysUntilDue(p) <= 7) {
+return "السلام عليكم ${p.name}، معك ترحال 🌿. حبيت أتواصل معك في الوقت المناسب وأشوف إذا عندك سفر قريب${p.dest ? " إلى ${p.dest}" : ""} أو حجز جديد نجهزه لك.";
+}
+
+return "السلام عليكم ${p.name}، معك ترحال. نتابع عملاءنا السابقين أولاً بأول، وإذا عندك أي خطة سفر قريبة${p.dest ? " إلى ${p.dest}" : ""} أقدر أساعدك في الخيارات المناسبة.";
+}
+
+function postTravelMessage(p) {
+
+return "السلام عليكم ${p.name} 🌹، معك ترحال. نحب نطمئن عليك بعد رحلتك ونسعد جدًا بمعرفة رأيك في خدمتنا. كيف كانت تجربتك معنا؟ ⭐ ممتازة / جيدة جدًا / جيدة / تحتاج تحسين. وإذا لديك أي ملاحظة أو اقتراح يهمنا جدًا أن تخبرنا به. شكرًا لثقتك بترحال 🤍✈️";
+}
+
+/* =========================
+اختيار العميل
+========================= */
+
+function choose(id) {
+
+let p = db.people.find(x => x.id === id);
+
+if (!p) return;
+
+let r = reason(p);
+
+let sat = p.sat
+? "الرضا: ${p.sat}/5"
+: "الرضا: غير مقيم";
+
+let suggestionBox = el("suggestion");
+
+if (suggestionBox) {
+
+suggestionBox.innerHTML = `
+  <div class="item">
+    <div class="priority">${esc(r.level)}</div>
+
+    <div class="muted">
+      ${esc(r.txt)}
+    </div>
+
+    <p>
+      ${esc(makeMessage(p))}
+    </p>
+
+    <span class="tag">
+      نوع: ${esc(p.type || "فرد")}
+    </span>
+
+    <span class="tag">
+      دورة: ${p.cycle || 45} يوم
+    </span>
+
+    <span class="tag">
+      ${esc(sat)}
+    </span>
+  </div>
+`;
+
+}
+
+if (el("msg")) {
+el("msg").value = makeMessage(p);
+}
+}
+
+/* =========================
+الذكاء الاصطناعي للعميل
+========================= */
+
+function selectAI(id) {
+
+let aiButton = document.querySelector('[data-tab="ai"]');
+
+if (aiButton) {
+aiButton.click();
+}
+
+if (el("aiPerson")) {
+el("aiPerson").value = id;
+}
+
+if (el("designPerson")) {
+el("designPerson").value = id;
+}
+
+choose(id);
+}
+
+function quickWA(id) {
+
+selectAI(id);
+
+setTimeout(openWhatsApp, 100);
+}
+
+/* =========================
+تحليل ترحال
+========================= */
+
+function askTarhal() {
+
+let q = el("ask")?.value.trim().toLowerCase() || "";
+
+let arr = [];
+
+if (q.includes("رض") || q.includes("تقييم")) {
+
+arr = db.people.filter(
+  p => p.sat && p.sat <= 3
+);
+
+} else if (
+q.includes("منقطع") ||
+q.includes("منقط")
+) {
+
+arr = db.people.filter(
+  p => p.last && inactiveDays(p) >= 60
+);
+
+} else if (q.includes("حجز")) {
+
+arr = db.people.filter(
+  p => db.trips.some(
+    t => t.personId === p.id
+  )
+);
+
+} else {
+
+arr = db.people.filter(
+  p => daysUntilDue(p) <= 7 || !p.last
+);
+
+}
+
+let result = el("askResult");
+
+if (!result) return;
+
+result.innerHTML = `
 <div class="item">
-<h3>🧠 أولاً: اختر مجال العمل</h3>
+<b>نتيجة التحليل: ${arr.length} عميل</b>
 
-<div class="grid">
-<div>
-<label>مجال العمل</label>
-<select id="designBusiness">
-<option value="">اختر المجال...</option>
-<option value="travel">✈️ السفر والسياحة</option>
-<option value="pharma">💊 الأدوية والصيدليات</option>
-<option value="medical">🏥 المركز الطبي</option>
-<option value="product">🛍️ المنتجات التجارية</option>
-<option value="company">🏢 الشركات والمؤسسات</option>
-<option value="general">📢 إعلان عام</option>
-</select>
+  <div class="muted">
+    ${
+      arr.map(p => esc(p.name)).join("، ")
+      || "لا توجد نتائج حسب البيانات الحالية."
+    }
+  </div>
 </div>
 
-<div>
-<label>الهدف التسويقي</label>
-<select id="designGoal">
-<option value="">اختر الهدف...</option>
-<option>جذب عملاء جدد</option>
-<option>زيادة المبيعات</option>
-<option>إطلاق منتج أو خدمة</option>
-<option>بناء الثقة والسمعة</option>
-<option>استعادة العملاء السابقين</option>
-<option>الإعلان عن عرض</option>
-<option>زيادة التفاعل</option>
-<option>حملة تسويقية كاملة</option>
-</select>
-</div>
-</div>
-</div>
-
-<div class="item">
-<h3>🖼️ ماذا تريد أن يصنع لك AI؟</h3>
-
-<select id="designOutput">
-<option value="">اختر نوع المحتوى...</option>
-<option>منشور فيسبوك</option>
-<option>إعلان واتساب</option>
-<option>تصميم إعلان</option>
-<option>صورة منتج</option>
-<option>حالة واتساب</option>
-<option>فيديو قصير</option>
-<option>حملة تسويقية كاملة</option>
-</select>
-</div>
-
-<div class="item">
-<h3>✍️ معلومات المشروع</h3>
-
-<div class="grid">
-<div>
-<label>اسم المنتج / الخدمة</label>
-<input id="designProduct" placeholder="مثال: عرض عمرة / دواء / خدمة">
-</div>
-
-<div>
-<label>الجمهور المستهدف</label>
-<input id="designAudience" placeholder="مثال: الشباب / النساء / الأطباء">
-</div>
-
-<div>
-<label>السعر أو العرض</label>
-<input id="designPrice" placeholder="اختياري">
-</div>
-
-<div>
-<label>المنطقة</label>
-<input id="designArea" placeholder="مثال: سيئون / القطن / حضرموت">
-</div>
-</div>
-
-<label style="margin-top:10px">أهم المميزات أو المعلومات</label>
-<textarea id="designInfo" placeholder="اكتب أهم ما تريد أن يعرفه العميل عن المنتج أو الخدمة..."></textarea>
-</div>
-
-<div class="item" style="background:#f8fafc">
-<h3>🤖 المساعد المتخصص</h3>
-<div id="designAiStatus" class="muted">
-اختر مجال العمل أولاً ليتم تشغيل المساعد المتخصص.
-</div>
-</div>
-
-<button class="btn gold" style="margin-top:10px;width:100%" onclick="runDesignAI()">
-✨ أنشئ الحملة بالذكاء الاصطناعي
-</button>
-
-<div id="designResult"></div>
-</div>
-<section id="hub" class="tab">
-<div class="card"><h2>مركز البرامج</h2>
-<p class="muted">ترحال AI مصمم كنواة قابلة للتوسع. البرامج المستقبلية يمكن أن تستخدم محركات العملاء والرسائل والتصميم والتقارير.</p>
-<div class="item"><h3>✈️ ترحال — إدارة السفر والعملاء</h3><span class="tag">نشط</span><span class="tag">العملاء</span><span class="tag">الحجوزات</span></div>
-<div class="item"><h3>🎨 استوديو التسويق والتصميم</h3><span class="tag">مضمن</span><span class="tag">رسائل</span><span class="tag">تصاميم</span></div>
-<div class="item"><h3>💊 برنامج سوق الدواء</h3><span class="tag">قابل للإضافة</span></div>
-<div class="item"><h3>🏥 برنامج تسويق المركز الطبي</h3><span class="tag">قابل للإضافة</span></div>
-<div class="item"><h3>➕ برنامج جديد</h3><span class="tag">معمارية توسع</span></div>
-</div>
-<div class="card"><h2>محركات مشتركة</h2><div class="grid">
-<div class="kpi">👥 قاعدة العملاء</div><div class="kpi">💬 الرسائل</div><div class="kpi">🎨 التصميم</div><div class="kpi">🧠 الذكاء المحلي</div><div class="kpi">📊 التقارير</div><div class="kpi">🔄 المتابعة</div>
-</div></div>
-</section>
-
-</main></div>
-<div id="toast" class="toast"></div>
-
-<script>
-const KEY="tarhal_ai_personal_v3";
-let old=JSON.parse(localStorage.getItem(KEY)||'{}');
-let db={people:Array.isArray(old.people)?old.people:[],trips:Array.isArray(old.trips)?old.trips:[]};
-function save(){localStorage.setItem(KEY,JSON.stringify(db));render()}
-function toast(x){let e=document.getElementById('toast');e.textContent=x;e.style.display='block';setTimeout(()=>e.style.display='none',1800)}
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.getElementById(b.dataset.tab).classList.add('active');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');render()});
-
-function addPerson(){
- let name=pName.value.trim();if(!name)return toast("اكتب اسم العميل");
- db.people.push({id:Date.now().toString(),name,type:pType.value,phone:pPhone.value.trim(),dest:pDest.value.trim(),cycle:+pCycle.value||45,last:pLast.value,sat:pSat.value?+pSat.value:null,notes:pNotes.value.trim(),created:new Date().toISOString(),events:[{date:new Date().toISOString(),text:"تمت إضافة العميل"}]});
- ["pName","pPhone","pDest","pNotes"].forEach(id=>document.getElementById(id).value="");save();toast("تم حفظ العميل");
+`;
 }
-function addTrip(){
- if(!tPerson.value)return toast("اختر العميل");
- let t={id:Date.now().toString(),personId:tPerson.value,dest:tDest.value.trim(),date:tDate.value,value:+tValue.value||0};
- db.trips.push(t);let p=db.people.find(x=>x.id===tPerson.value);
- if(p){p.last=tDate.value||p.last;p.dest=tDest.value||p.dest;p.events=p.events||[];p.events.push({date:new Date().toISOString(),text:`تم تسجيل حجز إلى ${p.dest||t.dest||"وجهة غير محددة"}`})}
- ["tDest","tDate","tValue"].forEach(id=>document.getElementById(id).value="");save();toast("تم تسجيل الحجز");
-}
-function daysSince(s){if(!s)return 9999;return Math.floor((Date.now()-new Date(s+"T00:00:00"))/86400000)}
-function daysUntilDue(p){return (p.cycle||45)-daysSince(p.last)}
-function inactiveDays(p){return Math.max(0,daysSince(p.last))}
-function reason(p){
- if(!p.last)return {level:"متابعة أولية",txt:"لا يوجد تاريخ سفر سابق؛ اجمع معلومة عن الخطة القادمة."};
- let d=daysUntilDue(p);
- if(d<=0)return {level:"أولوية عالية",txt:"حان موعد المتابعة المتوقع حسب دورة العميل."};
- if(d<=7)return {level:"أولوية",txt:"اقترب موعد المتابعة المتوقع."};
- return {level:"مراقبة",txt:"ما زال أمام موعد المتابعة المتوقع عدة أيام."};
-}
-function makeMessage(p){
- if(!p.last)return `السلام عليكم ${p.name}، معك ترحال. حبيت أتابع معك وأعرف إذا عندك رحلة قريبة${p.dest?` إلى ${p.dest}`:""} أو أي حجز تحتاج نساعدك فيه.`;
- if(daysUntilDue(p)<=7)return `السلام عليكم ${p.name}، معك ترحال 🌿. حبيت أتواصل معك في الوقت المناسب وأشوف إذا عندك سفر قريب${p.dest?` إلى ${p.dest}`:""} أو حجز جديد نجهزه لك.`;
- return `السلام عليكم ${p.name}، معك ترحال. نتابع عملاءنا السابقين أولاً بأول، وإذا عندك أي خطة سفر قريبة${p.dest?` إلى ${p.dest}`:""} أقدر أساعدك في الخيارات المناسبة.`;
-}
-function postTravelMessage(p){return `السلام عليكم ${p.name} 🌹، معك ترحال. نحب نطمئن عليك بعد رحلتك ونسعد جدًا بمعرفة رأيك في خدمتنا. كيف كانت تجربتك معنا؟ ⭐ ممتازة / جيدة جدًا / جيدة / تحتاج تحسين. وإذا لديك أي ملاحظة أو اقتراح يهمنا جدًا أن تخبرنا به. شكرًا لثقتك بترحال 🤍✈️`}
 
-function choose(id){
- let p=db.people.find(x=>x.id===id);if(!p)return;
- let r=reason(p), sat=p.sat?`الرضا: ${p.sat}/5`:"الرضا: غير مقيم";
- suggestion.innerHTML=`<div class="item"><div class="priority">${r.level}</div><div class="muted">${r.txt}</div><p>${makeMessage(p)}</p><span class="tag">نوع: ${p.type||"فرد"}</span><span class="tag">دورة: ${p.cycle||45} يوم</span><span class="tag">${sat}</span></div>`;
- msg.value=makeMessage(p);
+/* =========================================================
+🎨 استوديو التصميم والتسويق الذكي
+========================================================= */
+
+function makeDesign() {
+
+let business =
+el("designBusiness")?.value || "";
+
+let goal =
+el("designGoal")?.value || "";
+
+let output =
+el("designOutput")?.value || "";
+
+let product =
+el("designProduct")?.value.trim() || "";
+
+let audience =
+el("designAudience")?.value.trim() || "";
+
+let price =
+el("designPrice")?.value.trim() || "";
+
+let area =
+el("designArea")?.value.trim() || "";
+
+let info =
+el("designInfo")?.value.trim() || "";
+
+/* التحقق */
+
+if (!business) {
+return toast("اختر مجال العمل أولاً");
 }
-function selectAI(id){document.querySelector('[data-tab="ai"]').click();aiPerson.value=id;designPerson.value=id;choose(id)}
-function quickWA(id){selectAI(id);setTimeout(openWhatsApp,100)}
 
-function askTarhal(){
- let q=ask.value.trim().toLowerCase(), arr=[];
- if(q.includes("رض")||q.includes("تقييم")) arr=db.people.filter(p=>p.sat&&p.sat<=3);
- else if(q.includes("منقطع")||q.includes("منقط")) arr=db.people.filter(p=>p.last&&inactiveDays(p)>=60);
- else if(q.includes("حجز")) arr=db.people.filter(p=>db.trips.some(t=>t.personId===p.id));
- else arr=db.people.filter(p=>daysUntilDue(p)<=7||!p.last);
- askResult.innerHTML=`<div class="item"><b>نتيجة التحليل: ${arr.length} عميل</b><div class="muted">${arr.map(p=>esc(p.name)).join("، ")||"لا توجد نتائج حسب البيانات الحالية."}</div></div>`;
+if (!goal) {
+return toast("اختر الهدف التسويقي");
 }
- function makeDesign(){
- let business=document.getElementById("designBusiness")?.value||"";
- let goal=document.getElementById("designGoal")?.value||"";
- let output=document.getElementById("designOutput")?.value||"";
- let product=document.getElementById("designProduct")?.value.trim()||"";
- let audience=document.getElementById("designAudience")?.value.trim()||"";
- let price=document.getElementById("designPrice")?.value.trim()||"";
- let area=document.getElementById("designArea")?.value.trim()||"";
- let info=document.getElementById("designInfo")?.value.trim()||"";
 
- if(!business)return toast("اختر مجال العمل أولاً");
- if(!goal)return toast("اختر الهدف التسويقي");
- if(!output)return toast("اختر نوع المحتوى");
+if (!output) {
+return toast("اختر نوع المحتوى");
+}
 
- let names={
-   travel:"✈️ Travel Marketing AI",
-   pharma:"💊 Pharma Marketing AI",
-   medical:"🏥 Medical Marketing AI",
-   product:"🛍️ Product Marketing AI",
-   company:"🏢 Business Marketing AI",
-   general:"📢 General Marketing AI"
- };
+/* المساعد المتخصص */
 
- let prompt=`صمم ${output} عربيًا احترافيًا لمجال ${business} بهدف ${goal}.
-اسم المنتج أو الخدمة: ${product||"غير محدد"}.
-الجمهور المستهدف: ${audience||"عام"}.
-السعر أو العرض: ${price||"غير محدد"}.
-المنطقة: ${area||"غير محددة"}.
-المعلومات والمميزات: ${info||"غير محددة"}.
+let names = {
+
+travel:
+  "✈️ Travel Marketing AI",
+
+pharma:
+  "💊 Pharma Marketing AI",
+
+medical:
+  "🏥 Medical Marketing AI",
+
+product:
+  "🛍️ Product Marketing AI",
+
+company:
+  "🏢 Business Marketing AI",
+
+general:
+  "📢 General Marketing AI"
+
+};
+
+/* Prompt */
+
+let prompt =
+`صمم ${output} عربيًا احترافيًا لمجال ${business} بهدف ${goal}.
+
+اسم المنتج أو الخدمة:
+${product || "غير محدد"}
+
+الجمهور المستهدف:
+${audience || "عام"}
+
+السعر أو العرض:
+${price || "غير محدد"}
+
+المنطقة:
+${area || "غير محددة"}
+
+المعلومات والمميزات:
+${info || "غير محددة"}
+
 اجعل التصميم واضحًا واحترافيًا ومناسبًا للجمهور العربي، مع مساحة واضحة للنص والشعار، ولا تخترع أسعارًا أو معلومات غير موجودة.`;
 
- let text=`${product||"الخدمة"} — ${goal}`;
+/* الفكرة */
 
- designResult.innerHTML=`
- <div class="item" style="margin-top:10px">
-   <h3>🤖 ${names[business]}</h3>
+let text =
+"${product || "الخدمة"} — ${goal}";
 
-   <span class="tag">الهدف: ${esc(goal)}</span>
-   <span class="tag">المحتوى: ${esc(output)}</span>
+let result = el("designResult");
 
-   <h3 style="margin-top:12px">🎯 الفكرة</h3>
-   <p>${esc(text)}</p>
-
-   <h3>📝 المعلومات المستخدمة</h3>
-   <p class="muted">${esc(info||"لم تتم إضافة معلومات إضافية.")}</p>
-
-   <h3>🖼️ Prompt التصميم</h3>
-   <p>${esc(prompt)}</p>
-
-   <div class="row" style="margin-top:10px">
-     <button class="btn light" onclick="copyText(${JSON.stringify(prompt)})">
-       📋 نسخ الـPrompt
-     </button>
-     <button class="btn gold" onclick="prepareImagePrompt()">
-       🖼️ تجهيز الصورة
-     </button>
-   </div>
-
-   <div id="imageResult"></div>
- </div>`;
-}
- 
-function prepareImagePrompt(){
- let p=document.querySelector("#designResult p:nth-of-type(3)")?.textContent||"";
-
- imageResult.innerHTML=`
- <div class="item" style="margin-top:10px">
-   <h3>🖼️ الصورة جاهزة للتوليد</h3>
-   <p class="muted">
-   تم تجهيز وصف الصورة بنجاح. سنستخدمه لاحقًا مع محرك توليد الصور الحقيقي.
-   </p>
-   <button class="btn primary" onclick='copyText(${JSON.stringify(p)})'>
-   📋 نسخ وصف الصورة
-   </button>
- </div>`;
+if (!result) {
+return toast("لم يتم العثور على منطقة نتائج الاستوديو");
 }
 
-function runDesignAI(){
- makeDesign();
+result.innerHTML = `
+
+<div class="item" style="margin-top:10px">
+
+  <h3>
+    🤖 ${esc(names[business] || "Marketing AI")}
+  </h3>
+
+  <span class="tag">
+    الهدف: ${esc(goal)}
+  </span>
+
+  <span class="tag">
+    المحتوى: ${esc(output)}
+  </span>
+
+  <h3 style="margin-top:12px">
+    🎯 الفكرة
+  </h3>
+
+  <p>
+    ${esc(text)}
+  </p>
+
+  <h3>
+    📝 المعلومات المستخدمة
+  </h3>
+
+  <p class="muted">
+    ${esc(info || "لم تتم إضافة معلومات إضافية.")}
+  </p>
+
+  <h3>
+    🖼️ Prompt التصميم
+  </h3>
+
+  <p id="generatedDesignPrompt">
+    ${esc(prompt)}
+  </p>
+
+  <div class="row" style="margin-top:10px">
+
+    <button
+      class="btn light"
+      onclick='copyText(${JSON.stringify(prompt)})'
+    >
+      📋 نسخ الـPrompt
+    </button>
+
+    <button
+      class="btn gold"
+      onclick="prepareImagePrompt()"
+    >
+      🖼️ تجهيز الصورة
+    </button>
+
+  </div>
+
+  <div id="imageResult"></div>
+
+</div>
+
+`;
 }
 
-function openWhatsApp(){
- let p=db.people.find(x=>x.id===aiPerson.value);
+/* =========================================================
+الزر الموجود في HTML
+أنشئ الحملة بالذكاء الاصطناعي
+========================================================= */
 
- if(!p||!p.phone){
-   return toast("اختر عميلاً لديه رقم واتساب");
- }
+function runDesignAI() {
 
- let phone=p.phone.replace(/\D/g,'');
- window.location.href=
- `https://wa.me/${phone}?text=${encodeURIComponent(msg.value)}`;
+makeDesign();
 }
-copyText(msg.value)}
-function copyText(x){navigator.clipboard?.writeText(x);toast("تم النسخ")}
-function delPerson(id){if(confirm("حذف العميل وسجلاته؟")){db.people=db.people.filter(p=>p.id!==id);db.trips=db.trips.filter(t=>t.personId!==id);save()}}
-function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download="tarhal-ai-backup.json";a.click()}
-function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{db=JSON.parse(r.result);save();toast("تم استيراد النسخة")}catch{toast("ملف غير صالح")}};r.readAsText(f)}
-function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 
-function render(){
- nPeople.textContent=db.people.length;nTrips.textContent=db.trips.length;
- let actions=db.people.filter(p=>!p.last||daysUntilDue(p)<=7||(!p.sat&&p.last)).length;nActions.textContent=actions;
- let opts='<option value="">اختر...</option>'+db.people.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
- tPerson.innerHTML=opts;aiPerson.innerHTML=opts;designPerson.innerHTML=opts;
- aiPerson.onchange=()=>choose(aiPerson.value);
- peopleList.innerHTML=db.people.length?db.people.slice().reverse().map(p=>{let r=reason(p);return `<div class="item"><h3>${esc(p.name)}</h3><div class="muted">${esc(p.phone||"لا يوجد رقم")} · ${esc(p.dest||"وجهة غير محددة")}</div><span class="tag">${esc(p.type||"فرد")}</span><span class="tag">${r.level}</span><span class="tag">${p.sat?`رضا ${p.sat}/5`:"رضا غير مقيم"}</span><div class="row" style="margin-top:8px"><button class="btn wa" onclick="quickWA('${p.id}')">واتساب</button><button class="btn light" onclick="selectAI('${p.id}')">تحليل ذكي</button><button class="btn gold" onclick="postMsg('${p.id}')">رضا بعد السفر</button><button class="btn danger" onclick="delPerson('${p.id}')">حذف</button></div></div>`}).join(''):'<div class="empty">لا يوجد عملاء بعد.</div>';
- tripsList.innerHTML=db.trips.length?db.trips.slice().reverse().map(t=>{let p=db.people.find(x=>x.id===t.personId);return `<div class="item"><b>${esc(p?.name||"محذوف")}</b><div class="muted">${esc(t.dest||p?.dest||"—")} · ${esc(t.date||"—")} · ${t.value||0} ريال</div></div>`}).join(''):'<div class="empty">لا توجد حجوزات.</div>';
- let list=db.people.filter(p=>!p.last||daysUntilDue(p)<=7||(!p.sat&&p.last));
- worklist.innerHTML=list.length?list.slice(0,12).map(p=>{let action=!p.sat&&p.last?"أرسل قياس رضا بعد السفر":reason(p).txt;return `<div class="item"><b>${esc(p.name)}</b><div class="muted">${esc(action)}</div><button class="btn wa" style="margin-top:7px" onclick="quickWA('${p.id}')">ابدأ الإجراء</button></div>`}).join(''):'<div class="empty">لا توجد إجراءات عاجلة.</div>';
- let opp=db.people.filter(p=>p.last&&daysUntilDue(p)<=30||p.sat&&p.sat>=4).slice(0,8);
- opportunities.innerHTML=opp.length?opp.map(p=>`<div class="item"><b>${esc(p.name)}</b><div class="muted">${daysUntilDue(p)<=30?"فرصة متابعة قريبة":"عميل راضٍ يمكن بناء علاقة مستمرة معه"}</div></div>`).join(''):'<div class="empty">لا توجد فرص واضحة حاليًا.</div>';
+/* =========================================================
+تجهيز الصورة
+========================================================= */
+
+function prepareImagePrompt() {
+
+let p =
+el("generatedDesignPrompt")?.textContent || "";
+
+let result = el("imageResult");
+
+if (!result) return;
+
+result.innerHTML = `
+
+<div
+  class="item"
+  style="margin-top:10px"
+>
+
+  <h3>
+    🖼️ الصورة جاهزة للتوليد
+  </h3>
+
+  <p class="muted">
+    تم تجهيز وصف الصورة بنجاح.
+    سنستخدمه لاحقًا مع محرك توليد الصور الحقيقي داخل ترحال AI.
+  </p>
+
+  <button
+    class="btn primary"
+    onclick='copyText(${JSON.stringify(p)})'
+  >
+    📋 نسخ وصف الصورة
+  </button>
+
+</div>
+
+`;
 }
-function postMsg(id){let p=db.people.find(x=>x.id===id);if(!p)return;document.querySelector('[data-tab="ai"]').click();aiPerson.value=id;designPerson.value=id;msg.value=postTravelMessage(p);suggestion.innerHTML=`<div class="item"><b>متابعة رضا بعد السفر</b><p>${esc(msg.value)}</p></div>`}
+
+/* =========================================================
+واتساب
+========================================================= */
+
+function openWhatsApp() {
+
+let ai = el("aiPerson");
+
+let p =
+db.people.find(
+x => x.id === ai?.value
+);
+
+if (!p || !p.phone) {
+return toast("اختر عميلاً لديه رقم واتساب");
+}
+
+let phone =
+p.phone.replace(/\D/g, "");
+
+let message =
+el("msg")?.value || "";
+
+window.location.href =
+"https://wa.me/${phone}?text=${encodeURIComponent(message)}";
+}
+
+function copyMsg() {
+
+let message =
+el("msg")?.value || "";
+
+copyText(message);
+}
+
+function copyText(x) {
+
+if (
+navigator.clipboard &&
+navigator.clipboard.writeText
+) {
+
+navigator.clipboard.writeText(x)
+  .then(() => toast("تم النسخ"))
+  .catch(() => toast("تعذر النسخ"));
+
+} else {
+
+toast("النسخ غير مدعوم في هذا المتصفح");
+
+}
+}
+
+/* =========================
+حذف العميل
+========================= */
+
+function delPerson(id) {
+
+if (!confirm("حذف العميل وسجلاته؟")) {
+return;
+}
+
+db.people =
+db.people.filter(
+p => p.id !== id
+);
+
+db.trips =
+db.trips.filter(
+t => t.personId !== id
+);
+
+save();
+}
+
+/* =========================
+النسخ الاحتياطي
+========================= */
+
+function exportData() {
+
+let blob =
+new Blob(
+[JSON.stringify(db, null, 2)],
+{
+type: "application/json"
+}
+);
+
+let a =
+document.createElement("a");
+
+a.href =
+URL.createObjectURL(blob);
+
+a.download =
+"tarhal-ai-backup.json";
+
+a.click();
+
+URL.revokeObjectURL(a.href);
+}
+
+/* =========================
+استيراد البيانات
+========================= */
+
+function importData(e) {
+
+let f =
+e.target.files[0];
+
+if (!f) return;
+
+let r =
+new FileReader();
+
+r.onload = () => {
+
+try {
+
+  let imported =
+    JSON.parse(r.result);
+
+  db = {
+
+    people:
+      Array.isArray(imported.people)
+        ? imported.people
+        : [],
+
+    trips:
+      Array.isArray(imported.trips)
+        ? imported.trips
+        : []
+  };
+
+  save();
+
+  toast("تم استيراد النسخة");
+
+} catch {
+
+  toast("ملف غير صالح");
+}
+
+};
+
+r.readAsText(f);
+}
+
+/* =========================================================
+رسالة رضا بعد السفر
+========================================================= */
+
+function postMsg(id) {
+
+let p =
+db.people.find(
+x => x.id === id
+);
+
+if (!p) return;
+
+let aiButton =
+document.querySelector('[data-tab="ai"]');
+
+if (aiButton) {
+aiButton.click();
+}
+
+if (el("aiPerson")) {
+el("aiPerson").value = id;
+}
+
+if (el("designPerson")) {
+el("designPerson").value = id;
+}
+
+let message =
+postTravelMessage(p);
+
+if (el("msg")) {
+el("msg").value = message;
+}
+
+if (el("suggestion")) {
+
+el("suggestion").innerHTML = `
+
+  <div class="item">
+
+    <b>
+      متابعة رضا بعد السفر
+    </b>
+
+    <p>
+      ${esc(message)}
+    </p>
+
+  </div>
+`;
+
+}
+}
+
+/* =========================================================
+تحديث الواجهة
+========================================================= */
+
+function render() {
+
+/* الأرقام */
+
+if (el("nPeople")) {
+el("nPeople").textContent =
+db.people.length;
+}
+
+if (el("nTrips")) {
+el("nTrips").textContent =
+db.trips.length;
+}
+
+let actions =
+db.people.filter(
+p =>
+!p.last ||
+daysUntilDue(p) <= 7 ||
+(!p.sat && p.last)
+).length;
+
+if (el("nActions")) {
+el("nActions").textContent =
+actions;
+}
+
+/* قائمة العملاء */
+
+let opts =
+'<option value="">اختر...</option>' +
+db.people
+.map(
+p =>
+"<option value="${esc(p.id)}">${esc(p.name)}</option>"
+)
+.join("");
+
+if (el("tPerson")) {
+el("tPerson").innerHTML = opts;
+}
+
+if (el("aiPerson")) {
+el("aiPerson").innerHTML = opts;
+}
+
+if (el("designPerson")) {
+el("designPerson").innerHTML = opts;
+}
+
+if (el("aiPerson")) {
+
+el("aiPerson").onchange = () => {
+  choose(el("aiPerson").value);
+};
+
+}
+
+/* قائمة الأشخاص */
+
+let peopleList =
+el("peopleList");
+
+if (peopleList) {
+
+peopleList.innerHTML =
+  db.people.length
+
+    ? db.people
+        .slice()
+        .reverse()
+        .map(p => {
+
+          let r = reason(p);
+
+          return `
+
+            <div class="item">
+
+              <h3>
+                ${esc(p.name)}
+              </h3>
+
+              <div class="muted">
+                ${esc(p.phone || "لا يوجد رقم")}
+                ·
+                ${esc(p.dest || "وجهة غير محددة")}
+              </div>
+
+              <span class="tag">
+                ${esc(p.type || "فرد")}
+              </span>
+
+              <span class="tag">
+                ${esc(r.level)}
+              </span>
+
+              <span class="tag">
+                ${
+                  p.sat
+                    ? `رضا ${p.sat}/5`
+                    : "رضا غير مقيم"
+                }
+              </span>
+
+              <div
+                class="row"
+                style="margin-top:8px"
+              >
+
+                <button
+                  class="btn wa"
+                  onclick="quickWA('${p.id}')"
+                >
+                  واتساب
+                </button>
+
+                <button
+                  class="btn light"
+                  onclick="selectAI('${p.id}')"
+                >
+                  تحليل ذكي
+                </button>
+
+                <button
+                  class="btn gold"
+                  onclick="postMsg('${p.id}')"
+                >
+                  رضا بعد السفر
+                </button>
+
+                <button
+                  class="btn danger"
+                  onclick="delPerson('${p.id}')"
+                >
+                  حذف
+                </button>
+
+              </div>
+
+            </div>
+          `;
+
+        })
+        .join("")
+
+    : '<div class="empty">لا يوجد عملاء بعد.</div>';
+
+}
+
+/* الحجوزات */
+
+let tripsList =
+el("tripsList");
+
+if (tripsList) {
+
+tripsList.innerHTML =
+  db.trips.length
+
+    ? db.trips
+        .slice()
+        .reverse()
+        .map(t => {
+
+          let p =
+            db.people.find(
+              x => x.id === t.personId
+            );
+
+          return `
+
+            <div class="item">
+
+              <b>
+                ${esc(p?.name || "محذوف")}
+              </b>
+
+              <div class="muted">
+                ${esc(
+                  t.dest ||
+                  p?.dest ||
+                  "—"
+                )}
+                ·
+                ${esc(t.date || "—")}
+                ·
+                ${t.value || 0} ريال
+              </div>
+
+            </div>
+          `;
+
+        })
+        .join("")
+
+    : '<div class="empty">لا توجد حجوزات.</div>';
+
+}
+
+/* ماذا أفعل اليوم */
+
+let list =
+db.people.filter(
+p =>
+!p.last ||
+daysUntilDue(p) <= 7 ||
+(!p.sat && p.last)
+);
+
+let worklist =
+el("worklist");
+
+if (worklist) {
+
+worklist.innerHTML =
+  list.length
+
+    ? list
+        .slice(0, 12)
+        .map(p => {
+
+          let action =
+            !p.sat && p.last
+              ? "أرسل قياس رضا بعد السفر"
+              : reason(p).txt;
+
+          return `
+
+            <div class="item">
+
+              <b>
+                ${esc(p.name)}
+              </b>
+
+              <div class="muted">
+                ${esc(action)}
+              </div>
+
+              <button
+                class="btn wa"
+                style="margin-top:7px"
+                onclick="quickWA('${p.id}')"
+              >
+                ابدأ الإجراء
+              </button>
+
+            </div>
+          `;
+
+        })
+        .join("")
+
+    : '<div class="empty">لا توجد إجراءات عاجلة.</div>';
+
+}
+
+/* الفرص */
+
+let opp =
+db.people
+.filter(
+p =>
+(
+p.last &&
+daysUntilDue(p) <= 30
+) ||
+(
+p.sat &&
+p.sat >= 4
+)
+)
+.slice(0, 8);
+
+let opportunities =
+el("opportunities");
+
+if (opportunities) {
+
+opportunities.innerHTML =
+  opp.length
+
+    ? opp
+        .map(p => `
+
+          <div class="item">
+
+            <b>
+              ${esc(p.name)}
+            </b>
+
+            <div class="muted">
+              ${
+                daysUntilDue(p) <= 30
+                  ? "فرصة متابعة قريبة"
+                  : "عميل راضٍ يمكن بناء علاقة مستمرة معه"
+              }
+            </div>
+
+          </div>
+
+        `)
+        .join("")
+
+    : '<div class="empty">لا توجد فرص واضحة حاليًا.</div>';
+
+}
+}
+
+/* =========================================================
+تشغيل البرنامج
+========================================================= */
+
 render();
-if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-</script>
-</body></html>
+
+/* Service Worker */
+
+if ("serviceWorker" in navigator) {
+
+window.addEventListener(
+"load",
+() => {
+
+  navigator.serviceWorker
+    .register("./sw.js")
+    .catch(() => {});
+
+}
+
+);
+}

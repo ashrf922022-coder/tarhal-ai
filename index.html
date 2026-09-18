@@ -278,15 +278,83 @@ function askTarhal(){
  else arr=db.people.filter(p=>daysUntilDue(p)<=7||!p.last);
  askResult.innerHTML=`<div class="item"><b>نتيجة التحليل: ${arr.length} عميل</b><div class="muted">${arr.map(p=>esc(p.name)).join("، ")||"لا توجد نتائج حسب البيانات الحالية."}</div></div>`;
 }
+ function makeDesign(){
+ let business=document.getElementById("designBusiness")?.value||"";
+ let goal=document.getElementById("designGoal")?.value||"";
+ let output=document.getElementById("designOutput")?.value||"";
+ let product=document.getElementById("designProduct")?.value.trim()||"";
+ let audience=document.getElementById("designAudience")?.value.trim()||"";
+ let price=document.getElementById("designPrice")?.value.trim()||"";
+ let area=document.getElementById("designArea")?.value.trim()||"";
+ let info=document.getElementById("designInfo")?.value.trim()||"";
 
-function makeDesign(){
- let p=db.people.find(x=>x.id===designPerson.value), type=designType.value;
- let subject=p?`للعميل ${p.name}${p.dest?` — ${p.dest}`:""}`:"لحملة عامة";
- let message=p?(type==="رسالة رضا بعد السفر"?postTravelMessage(p):makeMessage(p)):"رسالة دعائية قصيرة لخدمة سفر احترافية";
- let prompt=`صمم إعلانًا عربيًا احترافيًا مناسبًا لواتساب، ${type}، ${subject}. اجعل التصميم واضحًا وموثوقًا، مع مساحة للنص العربي وشعار ترحال، وبدون اختلاق أسعار أو عروض غير مذكورة.`;
- designResult.innerHTML=`<div class="item"><b>الفكرة:</b><p>${esc(subject)} — ${esc(type)}</p><b>الرسالة المقترحة:</b><p>${esc(message)}</p><b>برومبت التصميم:</b><p>${esc(prompt)}</p><button class="btn light" onclick="copyText(${JSON.stringify(prompt+"\\n\\n"+message)})">نسخ المحتوى</button></div>`;
+ if(!business)return toast("اختر مجال العمل أولاً");
+ if(!goal)return toast("اختر الهدف التسويقي");
+ if(!output)return toast("اختر نوع المحتوى");
+
+ let names={
+   travel:"✈️ Travel Marketing AI",
+   pharma:"💊 Pharma Marketing AI",
+   medical:"🏥 Medical Marketing AI",
+   product:"🛍️ Product Marketing AI",
+   company:"🏢 Business Marketing AI",
+   general:"📢 General Marketing AI"
+ };
+
+ let prompt=`صمم ${output} عربيًا احترافيًا لمجال ${business} بهدف ${goal}.
+اسم المنتج أو الخدمة: ${product||"غير محدد"}.
+الجمهور المستهدف: ${audience||"عام"}.
+السعر أو العرض: ${price||"غير محدد"}.
+المنطقة: ${area||"غير محددة"}.
+المعلومات والمميزات: ${info||"غير محددة"}.
+اجعل التصميم واضحًا واحترافيًا ومناسبًا للجمهور العربي، مع مساحة واضحة للنص والشعار، ولا تخترع أسعارًا أو معلومات غير موجودة.`;
+
+ let text=`${product||"الخدمة"} — ${goal}`;
+
+ designResult.innerHTML=`
+ <div class="item" style="margin-top:10px">
+   <h3>🤖 ${names[business]}</h3>
+
+   <span class="tag">الهدف: ${esc(goal)}</span>
+   <span class="tag">المحتوى: ${esc(output)}</span>
+
+   <h3 style="margin-top:12px">🎯 الفكرة</h3>
+   <p>${esc(text)}</p>
+
+   <h3>📝 المعلومات المستخدمة</h3>
+   <p class="muted">${esc(info||"لم تتم إضافة معلومات إضافية.")}</p>
+
+   <h3>🖼️ Prompt التصميم</h3>
+   <p>${esc(prompt)}</p>
+
+   <div class="row" style="margin-top:10px">
+     <button class="btn light" onclick="copyText(${JSON.stringify(prompt)})">
+       📋 نسخ الـPrompt
+     </button>
+     <button class="btn gold" onclick="prepareImagePrompt()">
+       🖼️ تجهيز الصورة
+     </button>
+   </div>
+
+   <div id="imageResult"></div>
+ </div>`;
 }
-function openWhatsApp(){let p=db.people.find(x=>x.id===aiPerson.value);if(!p||!p.phone)return toast("اختر عميلاً لديه رقم واتساب");let phone=p.phone.replace(/\D/g,'');window.location.href=`https://wa.me/${phone}?text=${encodeURIComponent(msg.value)}`}
+
+function prepareImagePrompt(){
+ let p=document.querySelector("#designResult p:nth-of-type(3)")?.textContent||"";
+ imageResult.innerHTML=`
+ <div class="item" style="margin-top:10px">
+   <h3>🖼️ الصورة جاهزة للتوليد</h3>
+   <p class="muted">
+   تم تجهيز وصف الصورة. في الخطوة التالية سنربط هذا الزر بمحرك توليد الصور الحقيقي داخل ترحال AI.
+   </p>
+   <button class="btn primary" onclick="copyText(${JSON.stringify(p)})">
+   📋 نسخ وصف الصورة
+   </button>
+ </div>`;
+}
+
+let p=db.people.find(x=>x.id===aiPerson.value);if(!p||!p.phone)return toast("اختر عميلاً لديه رقم واتساب");let phone=p.phone.replace(/\D/g,'');window.location.href=`https://wa.me/${phone}?text=${encodeURIComponent(msg.value)}`}
 function copyMsg(){copyText(msg.value)}
 function copyText(x){navigator.clipboard?.writeText(x);toast("تم النسخ")}
 function delPerson(id){if(confirm("حذف العميل وسجلاته؟")){db.people=db.people.filter(p=>p.id!==id);db.trips=db.trips.filter(t=>t.personId!==id);save()}}

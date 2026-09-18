@@ -98,15 +98,6 @@ h2{font-size:17px;margin:4px 0 10px}h3{font-size:14px;margin:0 0 6px}.empty{text
 <select id="aiPerson"></select><div id="suggestion" style="margin-top:10px"></div>
 </div>
 
-<div class="card"><h2>استوديو AI للتسويق والتصميم</h2>
-<p class="muted">ينشئ لك فكرة ورسالة وبرومبت تصميم جاهز للاستخدام مع أدوات توليد الصور، مع ربطه بالعميل أو العرض.</p>
-<div class="grid">
-<div><label>نوع الحملة</label><select id="designType"><option>متابعة عميل</option><option>عرض سفر</option><option>عمرة</option><option>حج</option><option>رسالة رضا بعد السفر</option><option>إعلان عام</option></select></div>
-<div><label>العميل</label><select id="designPerson"></select></div>
-</div>
-<button class="btn gold" style="margin-top:9px;width:100%" onclick="makeDesign()">إنشاء فكرة التصميم والرسالة</button>
-<div id="designResult"></div>
-</div>
 
 <div class="card"><h2>رسالة واتساب</h2><textarea id="msg"></textarea>
 <div class="row" style="margin-top:8px"><button class="btn wa" onclick="openWhatsApp()">فتح واتساب وإرسال</button><button class="btn light" onclick="copyMsg()">نسخ الرسالة</button></div>
@@ -118,7 +109,104 @@ h2{font-size:17px;margin:4px 0 10px}h3{font-size:14px;margin:0 0 6px}.empty{text
 <input id="file" type="file" accept=".json" hidden onchange="importData(event)">
 </div></div>
 </section>
+ 
+<div class="card" id="designStudio">
+<h2>🎨 استوديو التصميم والتسويق الذكي</h2>
+<p class="muted">
+اختر مجال عملك، وسيتم تخصيص مساعد الذكاء الاصطناعي حسب المجال والهدف الذي تختاره.
+</p>
 
+<div class="item">
+<h3>🧠 أولاً: اختر مجال العمل</h3>
+
+<div class="grid">
+<div>
+<label>مجال العمل</label>
+<select id="designBusiness">
+<option value="">اختر المجال...</option>
+<option value="travel">✈️ السفر والسياحة</option>
+<option value="pharma">💊 الأدوية والصيدليات</option>
+<option value="medical">🏥 المركز الطبي</option>
+<option value="product">🛍️ المنتجات التجارية</option>
+<option value="company">🏢 الشركات والمؤسسات</option>
+<option value="general">📢 إعلان عام</option>
+</select>
+</div>
+
+<div>
+<label>الهدف التسويقي</label>
+<select id="designGoal">
+<option value="">اختر الهدف...</option>
+<option>جذب عملاء جدد</option>
+<option>زيادة المبيعات</option>
+<option>إطلاق منتج أو خدمة</option>
+<option>بناء الثقة والسمعة</option>
+<option>استعادة العملاء السابقين</option>
+<option>الإعلان عن عرض</option>
+<option>زيادة التفاعل</option>
+<option>حملة تسويقية كاملة</option>
+</select>
+</div>
+</div>
+</div>
+
+<div class="item">
+<h3>🖼️ ماذا تريد أن يصنع لك AI؟</h3>
+
+<select id="designOutput">
+<option value="">اختر نوع المحتوى...</option>
+<option>منشور فيسبوك</option>
+<option>إعلان واتساب</option>
+<option>تصميم إعلان</option>
+<option>صورة منتج</option>
+<option>حالة واتساب</option>
+<option>فيديو قصير</option>
+<option>حملة تسويقية كاملة</option>
+</select>
+</div>
+
+<div class="item">
+<h3>✍️ معلومات المشروع</h3>
+
+<div class="grid">
+<div>
+<label>اسم المنتج / الخدمة</label>
+<input id="designProduct" placeholder="مثال: عرض عمرة / دواء / خدمة">
+</div>
+
+<div>
+<label>الجمهور المستهدف</label>
+<input id="designAudience" placeholder="مثال: الشباب / النساء / الأطباء">
+</div>
+
+<div>
+<label>السعر أو العرض</label>
+<input id="designPrice" placeholder="اختياري">
+</div>
+
+<div>
+<label>المنطقة</label>
+<input id="designArea" placeholder="مثال: سيئون / القطن / حضرموت">
+</div>
+</div>
+
+<label style="margin-top:10px">أهم المميزات أو المعلومات</label>
+<textarea id="designInfo" placeholder="اكتب أهم ما تريد أن يعرفه العميل عن المنتج أو الخدمة..."></textarea>
+</div>
+
+<div class="item" style="background:#f8fafc">
+<h3>🤖 المساعد المتخصص</h3>
+<div id="designAiStatus" class="muted">
+اختر مجال العمل أولاً ليتم تشغيل المساعد المتخصص.
+</div>
+</div>
+
+<button class="btn gold" style="margin-top:10px;width:100%" onclick="runDesignAI()">
+✨ أنشئ الحملة بالذكاء الاصطناعي
+</button>
+
+<div id="designResult"></div>
+</div>
 <section id="hub" class="tab">
 <div class="card"><h2>مركز البرامج</h2>
 <p class="muted">ترحال AI مصمم كنواة قابلة للتوسع. البرامج المستقبلية يمكن أن تستخدم محركات العملاء والرسائل والتصميم والتقارير.</p>

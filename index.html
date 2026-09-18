@@ -339,23 +339,38 @@ function askTarhal(){
    <div id="imageResult"></div>
  </div>`;
 }
-
+ 
 function prepareImagePrompt(){
  let p=document.querySelector("#designResult p:nth-of-type(3)")?.textContent||"";
+
  imageResult.innerHTML=`
  <div class="item" style="margin-top:10px">
    <h3>🖼️ الصورة جاهزة للتوليد</h3>
    <p class="muted">
-   تم تجهيز وصف الصورة. في الخطوة التالية سنربط هذا الزر بمحرك توليد الصور الحقيقي داخل ترحال AI.
+   تم تجهيز وصف الصورة بنجاح. سنستخدمه لاحقًا مع محرك توليد الصور الحقيقي.
    </p>
-   <button class="btn primary" onclick="copyText(${JSON.stringify(p)})">
+   <button class="btn primary" onclick='copyText(${JSON.stringify(p)})'>
    📋 نسخ وصف الصورة
    </button>
  </div>`;
 }
 
-let p=db.people.find(x=>x.id===aiPerson.value);if(!p||!p.phone)return toast("اختر عميلاً لديه رقم واتساب");let phone=p.phone.replace(/\D/g,'');window.location.href=`https://wa.me/${phone}?text=${encodeURIComponent(msg.value)}`}
-function copyMsg(){copyText(msg.value)}
+function runDesignAI(){
+ makeDesign();
+}
+
+function openWhatsApp(){
+ let p=db.people.find(x=>x.id===aiPerson.value);
+
+ if(!p||!p.phone){
+   return toast("اختر عميلاً لديه رقم واتساب");
+ }
+
+ let phone=p.phone.replace(/\D/g,'');
+ window.location.href=
+ `https://wa.me/${phone}?text=${encodeURIComponent(msg.value)}`;
+}
+copyText(msg.value)}
 function copyText(x){navigator.clipboard?.writeText(x);toast("تم النسخ")}
 function delPerson(id){if(confirm("حذف العميل وسجلاته؟")){db.people=db.people.filter(p=>p.id!==id);db.trips=db.trips.filter(t=>t.personId!==id);save()}}
 function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download="tarhal-ai-backup.json";a.click()}

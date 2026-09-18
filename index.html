@@ -1,1140 +1,1962 @@
-const KEY = "tarhal_ai_personal_v3";
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>ترحال AI — نسختي الشخصية</title>
 
-let old = JSON.parse(localStorage.getItem(KEY) || "{}");
+<style>
+:root{
+font-family:system-ui,-apple-system,Segoe UI,Tahoma,Arial;
+background:#f1f5f9;
+color:#0f172a
+}
 
-let db = {
-people: Array.isArray(old.people) ? old.people : [],
-trips: Array.isArray(old.trips) ? old.trips : []
-};
+*{box-sizing:border-box}
+
+body{
+margin:0;
+background:#f1f5f9
+}
+
+.app{
+max-width:720px;
+margin:auto;
+min-height:100vh
+}
+
+header{
+position:sticky;
+top:0;
+z-index:5;
+background:#0f172a;
+color:#fff;
+padding:16px 16px 12px;
+box-shadow:0 2px 12px #0002
+}
+
+header h1{
+margin:0;
+font-size:22px
+}
+
+header p{
+margin:4px 0 0;
+color:#cbd5e1;
+font-size:12px
+}
+
+nav{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:6px;
+margin-top:12px
+}
+
+nav button{
+border:0;
+border-radius:10px;
+padding:9px 4px;
+background:#1e293b;
+color:#cbd5e1;
+font-weight:700;
+font-size:12px
+}
+
+nav button.active{
+background:#fff;
+color:#0f172a
+}
+
+main{
+padding:12px
+}
+
+.tab{
+display:none
+}
+
+.tab.active{
+display:block
+}
+
+.card{
+background:#fff;
+border-radius:16px;
+padding:14px;
+margin-bottom:12px;
+box-shadow:0 2px 10px #0000000b
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px
+}
+
+.grid3{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:8px
+}
+
+label{
+font-size:12px;
+color:#475569;
+display:block;
+margin-bottom:5px
+}
+
+input,select,textarea{
+width:100%;
+padding:11px;
+border:1px solid #cbd5e1;
+border-radius:10px;
+font:inherit;
+background:#fff
+}
+
+textarea{
+min-height:100px;
+resize:vertical
+}
+
+.btn{
+border:0;
+border-radius:11px;
+padding:11px 14px;
+font-weight:800;
+cursor:pointer
+}
+
+.primary{
+background:#0f172a;
+color:#fff
+}
+
+.wa{
+background:#15803d;
+color:#fff
+}
+
+.light{
+background:#e2e8f0;
+color:#0f172a
+}
+
+.danger{
+background:#fee2e2;
+color:#991b1b
+}
+
+.row{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+align-items:center
+}
+
+.row>*{
+flex:1
+}
+
+.stat{
+background:#f8fafc;
+border-radius:12px;
+padding:12px;
+text-align:center
+}
+
+.stat b{
+font-size:22px;
+display:block
+}
+
+.item{
+border:1px solid #e2e8f0;
+border-radius:12px;
+padding:12px;
+margin-top:8px
+}
+
+.muted{
+color:#64748b;
+font-size:12px
+}
+
+.tag{
+display:inline-block;
+background:#e2e8f0;
+border-radius:999px;
+padding:4px 8px;
+font-size:11px;
+margin:2px
+}
+
+h2{
+font-size:17px;
+margin:4px 0 10px
+}
+
+h3{
+font-size:14px;
+margin:0 0 6px
+}
+
+.empty{
+text-align:center;
+color:#64748b;
+padding:25px
+}
+
+.toast{
+position:fixed;
+bottom:18px;
+left:50%;
+transform:translateX(-50%);
+background:#0f172a;
+color:#fff;
+padding:10px 15px;
+border-radius:10px;
+display:none;
+z-index:20
+}
+
+.small{
+font-size:11px
+}
+
+.priority{
+font-weight:900
+}
 
 /* =========================
-أدوات مساعدة
-========================= */
+   استوديو التصميم والتسويق
+   ========================= */
 
-function el(id) {
-return document.getElementById(id);
+.design-card{
+border:1px solid #e2e8f0;
+background:linear-gradient(180deg,#ffffff,#f8fafc)
 }
 
-function save() {
-localStorage.setItem(KEY, JSON.stringify(db));
-render();
+.design-head{
+background:#0f172a;
+color:#fff;
+border-radius:13px;
+padding:14px;
+margin-bottom:14px
 }
 
-function toast(x) {
-let e = el("toast");
-if (!e) return;
-
-e.textContent = x;
-e.style.display = "block";
-
-setTimeout(() => {
-e.style.display = "none";
-}, 1800);
+.design-head h2{
+margin:0 0 5px;
+color:#fff
 }
 
-function esc(s) {
-return String(s ?? "").replace(
-/[&<>"']/g,
-m => ({
-"&": "&",
-"<": "<",
-">": ">",
-'"': """,
-"'": "'"
-}[m])
+.design-head p{
+margin:0;
+color:#cbd5e1;
+font-size:12px
+}
+
+.ai-badge{
+display:inline-block;
+background:#e2e8f0;
+color:#0f172a;
+padding:5px 9px;
+border-radius:999px;
+font-size:11px;
+font-weight:800;
+margin-top:8px
+}
+
+.design-section{
+margin-top:12px;
+padding-top:12px;
+border-top:1px solid #e2e8f0
+}
+
+.design-result{
+margin-top:14px
+}
+
+.result-box{
+background:#f8fafc;
+border:1px solid #cbd5e1;
+border-radius:12px;
+padding:12px;
+margin-top:8px
+}
+
+.result-box h3{
+margin-bottom:8px
+}
+
+.result-text{
+white-space:pre-wrap;
+line-height:1.8;
+font-size:13px
+}
+
+.copy-btn{
+margin-top:8px;
+background:#e2e8f0;
+color:#0f172a
+}
+
+.highlight{
+background:#f1f5f9;
+border-radius:10px;
+padding:10px;
+margin-top:8px;
+font-size:12px
+}
+
+@media(max-width:520px){
+.grid{
+grid-template-columns:1fr
+}
+
+.grid3{
+grid-template-columns:repeat(3,1fr)
+}
+
+nav button{
+font-size:11px;
+padding:8px 2px
+}
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header>
+<h1>ترحال AI</h1>
+<p>نسختك الشخصية لإدارة المسافرين والمتابعة الذكية</p>
+
+<nav>
+<button data-tab="dash" class="active">الرئيسية</button>
+<button data-tab="people">المسافرون</button>
+<button data-tab="trips">الحجوزات</button>
+<button data-tab="ai">الذكاء</button>
+</nav>
+</header>
+
+<main>
+
+<!-- =========================
+     الرئيسية
+========================= -->
+
+<section id="dash" class="tab active">
+
+<div class="card">
+<h2>لوحة اليوم</h2>
+
+<div class="grid3">
+
+<div class="stat">
+<b id="nPeople">0</b>
+<span class="muted">مسافر</span>
+</div>
+
+<div class="stat">
+<b id="nTrips">0</b>
+<span class="muted">حجز</span>
+</div>
+
+<div class="stat">
+<b id="nDue">0</b>
+<span class="muted">متابعة اليوم</span>
+</div>
+
+</div>
+</div>
+
+<div class="card">
+<h2>قائمة العمل الذكية</h2>
+<div id="worklist"></div>
+</div>
+
+</section>
+
+
+<!-- =========================
+     المسافرون
+========================= -->
+
+<section id="people" class="tab">
+
+<div class="card">
+
+<h2>إضافة مسافر</h2>
+
+<div class="grid">
+
+<div>
+<label>الاسم</label>
+<input id="pName" placeholder="مثلاً: أحمد محمد">
+</div>
+
+<div>
+<label>رقم واتساب</label>
+<input id="pPhone" placeholder="9677xxxxxxxx">
+</div>
+
+<div>
+<label>الوجهة المفضلة</label>
+<input id="pDest" placeholder="جدة / القاهرة...">
+</div>
+
+<div>
+<label>دورة السفر بالأيام</label>
+<input id="pCycle" type="number" value="45">
+</div>
+
+<div>
+<label>آخر سفر</label>
+<input id="pLast" type="date">
+</div>
+
+<div>
+<label>ملاحظات</label>
+<input id="pNotes" placeholder="شركة/عائلة/مقاعد...">
+</div>
+
+</div>
+
+<button
+class="btn primary"
+style="margin-top:10px;width:100%"
+onclick="addPerson()">
+حفظ المسافر
+</button>
+
+</div>
+
+
+<div class="card">
+<h2>المسافرون</h2>
+<div id="peopleList"></div>
+</div>
+
+</section>
+
+
+<!-- =========================
+     الحجوزات
+========================= -->
+
+<section id="trips" class="tab">
+
+<div class="card">
+
+<h2>تسجيل حجز</h2>
+
+<div class="grid">
+
+<div>
+<label>المسافر</label>
+<select id="tPerson"></select>
+</div>
+
+<div>
+<label>الوجهة</label>
+<input id="tDest" placeholder="الوجهة">
+</div>
+
+<div>
+<label>تاريخ السفر</label>
+<input id="tDate" type="date">
+</div>
+
+<div>
+<label>قيمة الحجز</label>
+<input id="tValue" type="number" value="0">
+</div>
+
+</div>
+
+<button
+class="btn primary"
+style="margin-top:10px;width:100%"
+onclick="addTrip()">
+تسجيل الحجز
+</button>
+
+</div>
+
+
+<div class="card">
+<h2>سجل الحجوزات</h2>
+<div id="tripsList"></div>
+</div>
+
+</section>
+
+
+<!-- =========================
+     الذكاء
+========================= -->
+
+<section id="ai" class="tab">
+
+<!-- مساعد المتابعة -->
+
+<div class="card">
+
+<h2>مساعد المتابعة الذكي</h2>
+
+<p class="muted">
+هذه النسخة الشخصية تعمل بدون مفتاح API.
+تقترح الأولويات والرسالة اعتماداً على البيانات التي أدخلتها فقط.
+</p>
+
+<select id="aiPerson"></select>
+
+<div id="suggestion" style="margin-top:10px"></div>
+
+</div>
+
+
+<!-- واتساب -->
+
+<div class="card">
+
+<h2>رسالة واتساب</h2>
+
+<textarea id="msg"></textarea>
+
+<div class="row" style="margin-top:8px">
+
+<button
+class="btn wa"
+onclick="openWhatsApp()">
+فتح واتساب وإرسال
+</button>
+
+<button
+class="btn light"
+onclick="copyMsg()">
+نسخ الرسالة
+</button>
+
+</div>
+
+<p class="muted">
+سيتم فتح محادثة واتساب بالرقم المسجل.
+الإرسال النهائي يتم منك.
+</p>
+
+</div>
+
+
+<!-- =========================
+     استوديو التصميم والتسويق
+========================= -->
+
+<div class="card design-card" id="designStudio">
+
+<div class="design-head">
+
+<h2>🎨 استوديو التصميم والتسويق الذكي</h2>
+
+<p>
+أنشئ فكرة تسويقية متكاملة تناسب نشاطك وجمهورك.
+</p>
+
+<div id="designAiStatus" class="ai-badge">
+General Marketing AI
+</div>
+
+</div>
+
+
+<div class="design-section">
+
+<h3>1️⃣ مجال النشاط</h3>
+
+<label>اختر المجال</label>
+
+<select id="designBusiness" onchange="updateDesignAI()">
+
+<option value="travel">
+✈️ السفر والسياحة
+</option>
+
+<option value="pharma">
+💊 الأدوية والصيدليات
+</option>
+
+<option value="medical">
+🏥 المركز الطبي
+</option>
+
+<option value="products">
+🛍️ المنتجات التجارية
+</option>
+
+<option value="business">
+🏢 الشركات والمؤسسات
+</option>
+
+<option value="general">
+📢 إعلان عام
+</option>
+
+</select>
+
+</div>
+
+
+<div class="design-section">
+
+<h3>2️⃣ الهدف التسويقي</h3>
+
+<label>ماذا تريد أن تحقق؟</label>
+
+<select id="designGoal">
+
+<option value="customers">
+جذب عملاء جدد
+</option>
+
+<option value="sales">
+زيادة المبيعات
+</option>
+
+<option value="launch">
+إطلاق منتج أو خدمة
+</option>
+
+<option value="trust">
+بناء الثقة والسمعة
+</option>
+
+<option value="return">
+استعادة العملاء السابقين
+</option>
+
+<option value="offer">
+الإعلان عن عرض
+</option>
+
+<option value="engagement">
+زيادة التفاعل
+</option>
+
+<option value="campaign">
+حملة تسويقية كاملة
+</option>
+
+</select>
+
+</div>
+
+
+<div class="design-section">
+
+<h3>3️⃣ نوع المحتوى</h3>
+
+<label>ماذا تريد أن ينتج الاستوديو؟</label>
+
+<select id="designOutput">
+
+<option value="facebook">
+منشور فيسبوك
+</option>
+
+<option value="whatsapp">
+إعلان واتساب
+</option>
+
+<option value="design">
+تصميم إعلان
+</option>
+
+<option value="product">
+صورة منتج
+</option>
+
+<option value="status">
+حالة واتساب
+</option>
+
+<option value="video">
+فيديو قصير
+</option>
+
+<option value="full">
+حملة تسويقية كاملة
+</option>
+
+</select>
+
+</div>
+
+
+<div class="design-section">
+
+<h3>4️⃣ معلومات المشروع</h3>
+
+<div class="grid">
+
+<div>
+<label>اسم المنتج / الخدمة</label>
+<input
+id="designProduct"
+placeholder="مثلاً: باقة عمرة، دواء، مركز طبي...">
+</div>
+
+<div>
+<label>الجمهور المستهدف</label>
+<input
+id="designAudience"
+placeholder="رجال، نساء، أطباء، عائلات...">
+</div>
+
+<div>
+<label>السعر أو العرض</label>
+<input
+id="designPrice"
+placeholder="مثلاً: خصم 20%">
+</div>
+
+<div>
+<label>المنطقة</label>
+<input
+id="designArea"
+placeholder="سيئون، القطن، حضرموت...">
+</div>
+
+</div>
+
+<label style="margin-top:10px">
+أهم المميزات أو المعلومات
+</label>
+
+<textarea
+id="designInfo"
+placeholder="اكتب هنا أهم التفاصيل والمميزات والعروض والمعلومات التي تريد أن يعتمد عليها الإعلان...">
+</textarea>
+
+</div>
+
+
+<div class="design-section">
+
+<button
+class="btn primary"
+style="width:100%;font-size:14px"
+onclick="runDesignAI()">
+
+✨ أنشئ الحملة بالذكاء الاصطناعي
+
+</button>
+
+</div>
+
+
+<div id="designResult" class="design-result"></div>
+
+</div>
+
+
+<!-- النسخة الاحتياطية -->
+
+<div class="card">
+
+<h2>نسخة احتياطية</h2>
+
+<div class="row">
+
+<button
+class="btn light"
+onclick="exportData()">
+تصدير البيانات
+</button>
+
+<button
+class="btn light"
+onclick="document.getElementById('file').click()">
+استيراد
+</button>
+
+<input
+id="file"
+type="file"
+accept=".json"
+hidden
+onchange="importData(event)">
+
+</div>
+
+</div>
+
+</section>
+
+</main>
+</div>
+
+
+<div id="toast" class="toast"></div>
+
+
+<script>
+
+const KEY="tarhal_ai_personal_v3";
+
+let db=JSON.parse(
+localStorage.getItem(KEY) ||
+'{"people":[],"trips":[]}'
 );
-}
+
 
 /* =========================
-التنقل بين الصفحات
+   أدوات أساسية
 ========================= */
 
-document.querySelectorAll("nav button").forEach(b => {
-b.onclick = () => {
-document.querySelectorAll(".tab").forEach(x => {
-x.classList.remove("active");
-});
-
-let target = el(b.dataset.tab);
-
-if (target) {
-  target.classList.add("active");
+function save(){
+localStorage.setItem(KEY,JSON.stringify(db));
+render();
 }
 
-document.querySelectorAll("nav button").forEach(x => {
-  x.classList.remove("active");
-});
+function toast(x){
 
-b.classList.add("active");
+let e=document.getElementById('toast');
+
+e.textContent=x;
+e.style.display='block';
+
+setTimeout(()=>{
+e.style.display='none';
+},1800);
+
+}
+
+
+/* =========================
+   التنقل
+========================= */
+
+document.querySelectorAll('nav button').forEach(b=>{
+
+b.onclick=()=>{
+
+document
+.querySelectorAll('.tab')
+.forEach(x=>x.classList.remove('active'));
+
+document
+.getElementById(b.dataset.tab)
+.classList.add('active');
+
+document
+.querySelectorAll('nav button')
+.forEach(x=>x.classList.remove('active'));
+
+b.classList.add('active');
 
 render();
 
 };
+
 });
 
+
 /* =========================
-العملاء
+   المسافرون
 ========================= */
 
-function addPerson() {
+function addPerson(){
 
-let name = el("pName")?.value.trim();
+let name=pName.value.trim();
 
-if (!name) {
-return toast("اكتب اسم العميل");
-}
+if(!name)
+return toast("اكتب اسم المسافر");
 
 db.people.push({
-id: Date.now().toString(),
-name: name,
-type: el("pType")?.value || "",
-phone: el("pPhone")?.value.trim() || "",
-dest: el("pDest")?.value.trim() || "",
-cycle: +(el("pCycle")?.value) || 45,
-last: el("pLast")?.value || "",
-sat: el("pSat")?.value ? +(el("pSat")?.value) : null,
-notes: el("pNotes")?.value.trim() || "",
-created: new Date().toISOString(),
 
-events: [
-  {
-    date: new Date().toISOString(),
-    text: "تمت إضافة العميل"
-  }
-]
+id:Date.now().toString(),
+
+name,
+
+phone:pPhone.value.trim(),
+
+dest:pDest.value.trim(),
+
+cycle:+pCycle.value||45,
+
+last:pLast.value,
+
+notes:pNotes.value.trim(),
+
+created:new Date().toISOString()
 
 });
 
-["pName", "pPhone", "pDest", "pNotes"].forEach(id => {
-if (el(id)) {
-el(id).value = "";
-}
+["pName","pPhone","pDest","pNotes"]
+.forEach(id=>{
+document.getElementById(id).value="";
 });
 
 save();
-toast("تم حفظ العميل");
+
+toast("تم حفظ المسافر");
+
 }
+
 
 /* =========================
-الحجوزات
+   الحجوزات
 ========================= */
 
-function addTrip() {
+function addTrip(){
 
-let person = el("tPerson");
+if(!tPerson.value)
+return toast("اختر المسافر");
 
-if (!person || !person.value) {
-return toast("اختر العميل");
-}
+db.trips.push({
 
-let t = {
-id: Date.now().toString(),
-personId: person.value,
-dest: el("tDest")?.value.trim() || "",
-date: el("tDate")?.value || "",
-value: +(el("tValue")?.value) || 0
-};
+id:Date.now().toString(),
 
-db.trips.push(t);
+personId:tPerson.value,
 
-let p = db.people.find(x => x.id === person.value);
+dest:tDest.value.trim(),
 
-if (p) {
+date:tDate.value,
 
-p.last = t.date || p.last;
-p.dest = t.dest || p.dest;
-p.events = p.events || [];
+value:+tValue.value||0
 
-p.events.push({
-  date: new Date().toISOString(),
-  text: `تم تسجيل حجز إلى ${p.dest || t.dest || "وجهة غير محددة"}`
 });
 
+let p=db.people.find(
+x=>x.id===tPerson.value
+);
+
+if(p){
+
+p.last=tDate.value;
+
+p.dest=tDest.value||p.dest;
+
 }
 
-["tDest", "tDate", "tValue"].forEach(id => {
-if (el(id)) {
-el(id).value = "";
-}
+["tDest","tDate","tValue"]
+.forEach(id=>{
+document.getElementById(id).value="";
 });
 
 save();
+
 toast("تم تسجيل الحجز");
+
 }
 
+
 /* =========================
-تحليل العملاء
+   المتابعة الذكية
 ========================= */
 
-function daysSince(s) {
+function daysSince(s){
 
-if (!s) return 9999;
+if(!s)return 9999;
 
 return Math.floor(
-(Date.now() - new Date(s + "T00:00:00")) / 86400000
+(Date.now()-new Date(s+"T00:00:00"))/86400000
 );
+
 }
 
-function daysUntilDue(p) {
-return (p.cycle || 45) - daysSince(p.last);
+function daysUntilDue(p){
+
+return (p.cycle||45)-daysSince(p.last);
+
 }
 
-function inactiveDays(p) {
-return Math.max(0, daysSince(p.last));
-}
+function reason(p){
 
-function reason(p) {
+let d=daysUntilDue(p);
 
-if (!p.last) {
-return {
-level: "متابعة أولية",
-txt: "لا يوجد تاريخ سفر سابق؛ اجمع معلومة عن الخطة القادمة."
-};
-}
-
-let d = daysUntilDue(p);
-
-if (d <= 0) {
-return {
-level: "أولوية عالية",
-txt: "حان موعد المتابعة المتوقع حسب دورة العميل."
-};
-}
-
-if (d <= 7) {
-return {
-level: "أولوية",
-txt: "اقترب موعد المتابعة المتوقع."
-};
-}
+if(!p.last)
 
 return {
-level: "مراقبة",
-txt: "ما زال أمام موعد المتابعة المتوقع عدة أيام."
+level:"متابعة",
+txt:"لا يوجد تاريخ سفر سابق؛ اجمع معلومة أولية عن موعد السفر والوجهة."
 };
+
+if(d<=0)
+
+return {
+level:"أولوية عالية",
+txt:"دخل موعد المتابعة المتوقع بناءً على دورة السفر المسجلة."
+};
+
+if(d<=7)
+
+return {
+level:"أولوية",
+txt:"اقترب موعد السفر المتوقع حسب دورة العميل."
+};
+
+return {
+level:"مراقبة",
+txt:"ما زال أمام موعد المتابعة المتوقع عدة أيام."
+};
+
 }
 
-/* =========================
-رسائل العملاء
-========================= */
 
-function makeMessage(p) {
+function makeMessage(p){
 
-if (!p.last) {
-return "السلام عليكم ${p.name}، معك ترحال. حبيت أتابع معك وأعرف إذا عندك رحلة قريبة${p.dest ? " إلى ${p.dest}" : ""} أو أي حجز تحتاج نساعدك فيه.";
+let dest=p.dest?
+` إلى ${p.dest}`:"";
+
+if(!p.last)
+
+return `السلام عليكم ${p.name}، معك ترحال. حبيت أتابع معك وأعرف إذا عندك رحلة قريبة${dest} أو أي حجز تحتاج نساعدك فيه.`;
+
+if(daysUntilDue(p)<=7)
+
+return `السلام عليكم ${p.name}، معك ترحال 🌿. بحكم رحلتك السابقة${dest}، حبيت أتواصل معك في الوقت المناسب وأشوف إذا عندك سفر قريب أو حجز جديد نجهزه لك.`;
+
+return `السلام عليكم ${p.name}، معك ترحال. نتابع عملاءنا السابقين أولاً بأول، وإذا عندك أي خطة سفر قريبة${dest} أقدر أساعدك في الخيارات المناسبة.`;
+
 }
 
-if (daysUntilDue(p) <= 7) {
-return "السلام عليكم ${p.name}، معك ترحال 🌿. حبيت أتواصل معك في الوقت المناسب وأشوف إذا عندك سفر قريب${p.dest ? " إلى ${p.dest}" : ""} أو حجز جديد نجهزه لك.";
-}
 
-return "السلام عليكم ${p.name}، معك ترحال. نتابع عملاءنا السابقين أولاً بأول، وإذا عندك أي خطة سفر قريبة${p.dest ? " إلى ${p.dest}" : ""} أقدر أساعدك في الخيارات المناسبة.";
-}
+function choose(id){
 
-function postTravelMessage(p) {
+let p=db.people.find(x=>x.id===id);
 
-return "السلام عليكم ${p.name} 🌹، معك ترحال. نحب نطمئن عليك بعد رحلتك ونسعد جدًا بمعرفة رأيك في خدمتنا. كيف كانت تجربتك معنا؟ ⭐ ممتازة / جيدة جدًا / جيدة / تحتاج تحسين. وإذا لديك أي ملاحظة أو اقتراح يهمنا جدًا أن تخبرنا به. شكرًا لثقتك بترحال 🤍✈️";
-}
+if(!p)return;
 
-/* =========================
-اختيار العميل
-========================= */
+let r=reason(p);
 
-function choose(id) {
+suggestion.innerHTML=`
 
-let p = db.people.find(x => x.id === id);
+<div class="item">
 
-if (!p) return;
+<div class="priority">${r.level}</div>
 
-let r = reason(p);
+<div class="muted">${r.txt}</div>
 
-let sat = p.sat
-? "الرضا: ${p.sat}/5"
-: "الرضا: غير مقيم";
+<p>${makeMessage(p)}</p>
 
-let suggestionBox = el("suggestion");
+<div class="tag">
+دورة: ${p.cycle} يوم
+</div>
 
-if (suggestionBox) {
+<div class="tag">
+آخر سفر: ${p.last||"غير مسجل"}
+</div>
 
-suggestionBox.innerHTML = `
-  <div class="item">
-    <div class="priority">${esc(r.level)}</div>
+</div>
 
-    <div class="muted">
-      ${esc(r.txt)}
-    </div>
-
-    <p>
-      ${esc(makeMessage(p))}
-    </p>
-
-    <span class="tag">
-      نوع: ${esc(p.type || "فرد")}
-    </span>
-
-    <span class="tag">
-      دورة: ${p.cycle || 45} يوم
-    </span>
-
-    <span class="tag">
-      ${esc(sat)}
-    </span>
-  </div>
 `;
 
+msg.value=makeMessage(p);
+
 }
 
-if (el("msg")) {
-el("msg").value = makeMessage(p);
-}
-}
 
 /* =========================
-الذكاء الاصطناعي للعميل
+   عرض البيانات
 ========================= */
 
-function selectAI(id) {
+function render(){
 
-let aiButton = document.querySelector('[data-tab="ai"]');
+nPeople.textContent=db.people.length;
 
-if (aiButton) {
-aiButton.click();
+nTrips.textContent=db.trips.length;
+
+let due=db.people.filter(
+p=>daysUntilDue(p)<=7
+).length;
+
+nDue.textContent=due;
+
+
+/* المسافرون في الحجوزات */
+
+tPerson.innerHTML=
+'<option value="">اختر...</option>'+
+db.people.map(p=>
+`<option value="${p.id}">
+${esc(p.name)}
+</option>`
+).join('');
+
+
+/* المسافرون في الذكاء */
+
+aiPerson.innerHTML=
+'<option value="">اختر مسافر...</option>'+
+db.people.map(p=>
+`<option value="${p.id}">
+${esc(p.name)}
+</option>`
+).join('');
+
+aiPerson.onchange=()=>{
+choose(aiPerson.value);
+};
+
+
+/* قائمة المسافرين */
+
+peopleList.innerHTML=
+
+db.people.length?
+
+db.people.map(p=>{
+
+let r=reason(p);
+
+return `
+
+<div class="item">
+
+<h3>${esc(p.name)}</h3>
+
+<div class="muted">
+${esc(p.phone||"لا يوجد رقم")}
+ ·
+${esc(p.dest||"وجهة غير محددة")}
+</div>
+
+<div class="tag">
+${r.level}
+</div>
+
+<div class="tag">
+بعد ${Math.max(0,daysUntilDue(p))} يوم تقريباً
+</div>
+
+<div
+class="row"
+style="margin-top:8px">
+
+<button
+class="btn wa"
+onclick="quickWA('${p.id}')">
+واتساب
+</button>
+
+<button
+class="btn light"
+onclick="selectAI('${p.id}')">
+تحليل ذكي
+</button>
+
+<button
+class="btn danger"
+onclick="delPerson('${p.id}')">
+حذف
+</button>
+
+</div>
+
+</div>
+
+`;
+
+}).join('')
+
+:
+
+'<div class="empty">لا يوجد مسافرون بعد.</div>';
+
+
+/* الحجوزات */
+
+tripsList.innerHTML=
+
+db.trips.length?
+
+db.trips
+.slice()
+.reverse()
+.map(t=>{
+
+let p=db.people.find(
+x=>x.id===t.personId
+);
+
+return `
+
+<div class="item">
+
+<b>
+${esc(p?.name||"محذوف")}
+</b>
+
+<div class="muted">
+
+${esc(t.dest||p?.dest||"—")}
+ ·
+${esc(t.date||"—")}
+ ·
+${t.value} ريال
+
+</div>
+
+</div>
+
+`;
+
+}).join('')
+
+:
+
+'<div class="empty">لا توجد حجوزات.</div>';
+
+
+/* قائمة العمل */
+
+let list=db.people
+.filter(p=>daysUntilDue(p)<=7)
+.sort((a,b)=>
+daysUntilDue(a)-daysUntilDue(b)
+);
+
+worklist.innerHTML=
+
+list.length?
+
+list.map(p=>`
+
+<div class="item">
+
+<b>${esc(p.name)}</b>
+
+<div class="muted">
+${reason(p).txt}
+</div>
+
+<button
+class="btn wa"
+style="margin-top:7px"
+onclick="quickWA('${p.id}')">
+
+ابدأ المتابعة
+
+</button>
+
+</div>
+
+`).join('')
+
+:
+
+'<div class="empty">لا توجد متابعة عاجلة حسب البيانات الحالية.</div>';
+
 }
 
-if (el("aiPerson")) {
-el("aiPerson").value = id;
-}
 
-if (el("designPerson")) {
-el("designPerson").value = id;
-}
+/* =========================
+   واتساب
+========================= */
+
+function selectAI(id){
+
+document
+.querySelector('[data-tab="ai"]')
+.click();
+
+aiPerson.value=id;
 
 choose(id);
+
 }
 
-function quickWA(id) {
+
+function quickWA(id){
 
 selectAI(id);
 
-setTimeout(openWhatsApp, 100);
+setTimeout(openWhatsApp,100);
+
 }
+
+
+function openWhatsApp(){
+
+let p=db.people.find(
+x=>x.id===aiPerson.value
+);
+
+if(!p||!p.phone)
+
+return toast("اختر مسافراً لديه رقم واتساب");
+
+let phone=p.phone.replace(/\D/g,'');
+
+let text=encodeURIComponent(msg.value);
+
+window.location.href=
+`https://wa.me/${phone}?text=${text}`;
+
+}
+
+
+function copyMsg(){
+
+navigator.clipboard?.writeText(msg.value);
+
+toast("تم نسخ الرسالة");
+
+}
+
 
 /* =========================
-تحليل ترحال
+   حذف
 ========================= */
 
-function askTarhal() {
+function delPerson(id){
 
-let q = el("ask")?.value.trim().toLowerCase() || "";
+if(
+confirm("حذف المسافر وسجلاته؟")
+){
 
-let arr = [];
-
-if (q.includes("رض") || q.includes("تقييم")) {
-
-arr = db.people.filter(
-  p => p.sat && p.sat <= 3
+db.people=db.people.filter(
+p=>p.id!==id
 );
 
-} else if (
-q.includes("منقطع") ||
-q.includes("منقط")
-) {
-
-arr = db.people.filter(
-  p => p.last && inactiveDays(p) >= 60
-);
-
-} else if (q.includes("حجز")) {
-
-arr = db.people.filter(
-  p => db.trips.some(
-    t => t.personId === p.id
-  )
-);
-
-} else {
-
-arr = db.people.filter(
-  p => daysUntilDue(p) <= 7 || !p.last
-);
-
-}
-
-let result = el("askResult");
-
-if (!result) return;
-
-result.innerHTML = `
-<div class="item">
-<b>نتيجة التحليل: ${arr.length} عميل</b>
-
-  <div class="muted">
-    ${
-      arr.map(p => esc(p.name)).join("، ")
-      || "لا توجد نتائج حسب البيانات الحالية."
-    }
-  </div>
-</div>
-
-`;
-}
-
-/* =========================================================
-🎨 استوديو التصميم والتسويق الذكي
-========================================================= */
-
-function makeDesign() {
-
-let business =
-el("designBusiness")?.value || "";
-
-let goal =
-el("designGoal")?.value || "";
-
-let output =
-el("designOutput")?.value || "";
-
-let product =
-el("designProduct")?.value.trim() || "";
-
-let audience =
-el("designAudience")?.value.trim() || "";
-
-let price =
-el("designPrice")?.value.trim() || "";
-
-let area =
-el("designArea")?.value.trim() || "";
-
-let info =
-el("designInfo")?.value.trim() || "";
-
-/* التحقق */
-
-if (!business) {
-return toast("اختر مجال العمل أولاً");
-}
-
-if (!goal) {
-return toast("اختر الهدف التسويقي");
-}
-
-if (!output) {
-return toast("اختر نوع المحتوى");
-}
-
-/* المساعد المتخصص */
-
-let names = {
-
-travel:
-  "✈️ Travel Marketing AI",
-
-pharma:
-  "💊 Pharma Marketing AI",
-
-medical:
-  "🏥 Medical Marketing AI",
-
-product:
-  "🛍️ Product Marketing AI",
-
-company:
-  "🏢 Business Marketing AI",
-
-general:
-  "📢 General Marketing AI"
-
-};
-
-/* Prompt */
-
-let prompt =
-`صمم ${output} عربيًا احترافيًا لمجال ${business} بهدف ${goal}.
-
-اسم المنتج أو الخدمة:
-${product || "غير محدد"}
-
-الجمهور المستهدف:
-${audience || "عام"}
-
-السعر أو العرض:
-${price || "غير محدد"}
-
-المنطقة:
-${area || "غير محددة"}
-
-المعلومات والمميزات:
-${info || "غير محددة"}
-
-اجعل التصميم واضحًا واحترافيًا ومناسبًا للجمهور العربي، مع مساحة واضحة للنص والشعار، ولا تخترع أسعارًا أو معلومات غير موجودة.`;
-
-/* الفكرة */
-
-let text =
-"${product || "الخدمة"} — ${goal}";
-
-let result = el("designResult");
-
-if (!result) {
-return toast("لم يتم العثور على منطقة نتائج الاستوديو");
-}
-
-result.innerHTML = `
-
-<div class="item" style="margin-top:10px">
-
-  <h3>
-    🤖 ${esc(names[business] || "Marketing AI")}
-  </h3>
-
-  <span class="tag">
-    الهدف: ${esc(goal)}
-  </span>
-
-  <span class="tag">
-    المحتوى: ${esc(output)}
-  </span>
-
-  <h3 style="margin-top:12px">
-    🎯 الفكرة
-  </h3>
-
-  <p>
-    ${esc(text)}
-  </p>
-
-  <h3>
-    📝 المعلومات المستخدمة
-  </h3>
-
-  <p class="muted">
-    ${esc(info || "لم تتم إضافة معلومات إضافية.")}
-  </p>
-
-  <h3>
-    🖼️ Prompt التصميم
-  </h3>
-
-  <p id="generatedDesignPrompt">
-    ${esc(prompt)}
-  </p>
-
-  <div class="row" style="margin-top:10px">
-
-    <button
-      class="btn light"
-      onclick='copyText(${JSON.stringify(prompt)})'
-    >
-      📋 نسخ الـPrompt
-    </button>
-
-    <button
-      class="btn gold"
-      onclick="prepareImagePrompt()"
-    >
-      🖼️ تجهيز الصورة
-    </button>
-
-  </div>
-
-  <div id="imageResult"></div>
-
-</div>
-
-`;
-}
-
-/* =========================================================
-الزر الموجود في HTML
-أنشئ الحملة بالذكاء الاصطناعي
-========================================================= */
-
-function runDesignAI() {
-
-makeDesign();
-}
-
-/* =========================================================
-تجهيز الصورة
-========================================================= */
-
-function prepareImagePrompt() {
-
-let p =
-el("generatedDesignPrompt")?.textContent || "";
-
-let result = el("imageResult");
-
-if (!result) return;
-
-result.innerHTML = `
-
-<div
-  class="item"
-  style="margin-top:10px"
->
-
-  <h3>
-    🖼️ الصورة جاهزة للتوليد
-  </h3>
-
-  <p class="muted">
-    تم تجهيز وصف الصورة بنجاح.
-    سنستخدمه لاحقًا مع محرك توليد الصور الحقيقي داخل ترحال AI.
-  </p>
-
-  <button
-    class="btn primary"
-    onclick='copyText(${JSON.stringify(p)})'
-  >
-    📋 نسخ وصف الصورة
-  </button>
-
-</div>
-
-`;
-}
-
-/* =========================================================
-واتساب
-========================================================= */
-
-function openWhatsApp() {
-
-let ai = el("aiPerson");
-
-let p =
-db.people.find(
-x => x.id === ai?.value
-);
-
-if (!p || !p.phone) {
-return toast("اختر عميلاً لديه رقم واتساب");
-}
-
-let phone =
-p.phone.replace(/\D/g, "");
-
-let message =
-el("msg")?.value || "";
-
-window.location.href =
-"https://wa.me/${phone}?text=${encodeURIComponent(message)}";
-}
-
-function copyMsg() {
-
-let message =
-el("msg")?.value || "";
-
-copyText(message);
-}
-
-function copyText(x) {
-
-if (
-navigator.clipboard &&
-navigator.clipboard.writeText
-) {
-
-navigator.clipboard.writeText(x)
-  .then(() => toast("تم النسخ"))
-  .catch(() => toast("تعذر النسخ"));
-
-} else {
-
-toast("النسخ غير مدعوم في هذا المتصفح");
-
-}
-}
-
-/* =========================
-حذف العميل
-========================= */
-
-function delPerson(id) {
-
-if (!confirm("حذف العميل وسجلاته؟")) {
-return;
-}
-
-db.people =
-db.people.filter(
-p => p.id !== id
-);
-
-db.trips =
-db.trips.filter(
-t => t.personId !== id
+db.trips=db.trips.filter(
+t=>t.personId!==id
 );
 
 save();
+
 }
+
+}
+
 
 /* =========================
-النسخ الاحتياطي
+   النسخ الاحتياطي
 ========================= */
 
-function exportData() {
+function exportData(){
 
-let blob =
-new Blob(
-[JSON.stringify(db, null, 2)],
-{
-type: "application/json"
-}
+let blob=new Blob(
+[JSON.stringify(db,null,2)],
+{type:"application/json"}
 );
 
-let a =
-document.createElement("a");
+let a=document.createElement('a');
 
-a.href =
-URL.createObjectURL(blob);
+a.href=URL.createObjectURL(blob);
 
-a.download =
-"tarhal-ai-backup.json";
+a.download="tarhal-ai-backup.json";
 
 a.click();
 
-URL.revokeObjectURL(a.href);
 }
 
-/* =========================
-استيراد البيانات
-========================= */
 
-function importData(e) {
+function importData(e){
 
-let f =
-e.target.files[0];
+let f=e.target.files[0];
 
-if (!f) return;
+if(!f)return;
 
-let r =
-new FileReader();
+let r=new FileReader();
 
-r.onload = () => {
+r.onload=()=>{
 
-try {
+try{
 
-  let imported =
-    JSON.parse(r.result);
+db=JSON.parse(r.result);
 
-  db = {
+save();
 
-    people:
-      Array.isArray(imported.people)
-        ? imported.people
-        : [],
+toast("تم استيراد النسخة");
 
-    trips:
-      Array.isArray(imported.trips)
-        ? imported.trips
-        : []
-  };
+}
 
-  save();
+catch{
 
-  toast("تم استيراد النسخة");
+toast("ملف غير صالح");
 
-} catch {
-
-  toast("ملف غير صالح");
 }
 
 };
 
 r.readAsText(f);
+
 }
 
-/* =========================================================
-رسالة رضا بعد السفر
-========================================================= */
 
-function postMsg(id) {
+/* =========================
+   حماية النصوص
+========================= */
 
-let p =
-db.people.find(
-x => x.id === id
+function esc(s){
+
+return String(s??"")
+.replace(
+/[&<>"']/g,
+m=>({
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#039;"
+}[m])
 );
 
-if (!p) return;
-
-let aiButton =
-document.querySelector('[data-tab="ai"]');
-
-if (aiButton) {
-aiButton.click();
 }
 
-if (el("aiPerson")) {
-el("aiPerson").value = id;
+
+/* =====================================================
+   استوديو التصميم والتسويق الذكي
+===================================================== */
+
+const designAI={
+
+travel:"Travel Marketing AI",
+
+pharma:"Pharma Marketing AI",
+
+medical:"Medical Marketing AI",
+
+products:"Product Marketing AI",
+
+business:"Business Marketing AI",
+
+general:"General Marketing AI"
+
+};
+
+
+function updateDesignAI(){
+
+let business=
+document.getElementById("designBusiness").value;
+
+document.getElementById("designAiStatus")
+.textContent=
+designAI[business]||"General Marketing AI";
+
 }
 
-if (el("designPerson")) {
-el("designPerson").value = id;
-}
 
-let message =
-postTravelMessage(p);
+/* =========================
+   الحصول على النصوص
+========================= */
 
-if (el("msg")) {
-el("msg").value = message;
-}
+function getDesignData(){
 
-if (el("suggestion")) {
+return {
 
-el("suggestion").innerHTML = `
+business:
+document.getElementById("designBusiness").value,
 
-  <div class="item">
+goal:
+document.getElementById("designGoal").value,
 
-    <b>
-      متابعة رضا بعد السفر
-    </b>
+output:
+document.getElementById("designOutput").value,
 
-    <p>
-      ${esc(message)}
-    </p>
+product:
+document.getElementById("designProduct").value.trim(),
 
-  </div>
-`;
+audience:
+document.getElementById("designAudience").value.trim(),
 
-}
-}
+price:
+document.getElementById("designPrice").value.trim(),
 
-/* =========================================================
-تحديث الواجهة
-========================================================= */
+area:
+document.getElementById("designArea").value.trim(),
 
-function render() {
+info:
+document.getElementById("designInfo").value.trim()
 
-/* الأرقام */
-
-if (el("nPeople")) {
-el("nPeople").textContent =
-db.people.length;
-}
-
-if (el("nTrips")) {
-el("nTrips").textContent =
-db.trips.length;
-}
-
-let actions =
-db.people.filter(
-p =>
-!p.last ||
-daysUntilDue(p) <= 7 ||
-(!p.sat && p.last)
-).length;
-
-if (el("nActions")) {
-el("nActions").textContent =
-actions;
-}
-
-/* قائمة العملاء */
-
-let opts =
-'<option value="">اختر...</option>' +
-db.people
-.map(
-p =>
-"<option value="${esc(p.id)}">${esc(p.name)}</option>"
-)
-.join("");
-
-if (el("tPerson")) {
-el("tPerson").innerHTML = opts;
-}
-
-if (el("aiPerson")) {
-el("aiPerson").innerHTML = opts;
-}
-
-if (el("designPerson")) {
-el("designPerson").innerHTML = opts;
-}
-
-if (el("aiPerson")) {
-
-el("aiPerson").onchange = () => {
-  choose(el("aiPerson").value);
 };
 
 }
 
-/* قائمة الأشخاص */
 
-let peopleList =
-el("peopleList");
+/* =========================
+   اسم المجال
+========================= */
 
-if (peopleList) {
+function businessName(type){
 
-peopleList.innerHTML =
-  db.people.length
+const names={
 
-    ? db.people
-        .slice()
-        .reverse()
-        .map(p => {
+travel:"السفر والسياحة",
 
-          let r = reason(p);
+pharma:"الأدوية والصيدليات",
 
-          return `
+medical:"المركز الطبي",
 
-            <div class="item">
+products:"المنتجات التجارية",
 
-              <h3>
-                ${esc(p.name)}
-              </h3>
+business:"الشركات والمؤسسات",
 
-              <div class="muted">
-                ${esc(p.phone || "لا يوجد رقم")}
-                ·
-                ${esc(p.dest || "وجهة غير محددة")}
-              </div>
+general:"الإعلان العام"
 
-              <span class="tag">
-                ${esc(p.type || "فرد")}
-              </span>
+};
 
-              <span class="tag">
-                ${esc(r.level)}
-              </span>
-
-              <span class="tag">
-                ${
-                  p.sat
-                    ? `رضا ${p.sat}/5`
-                    : "رضا غير مقيم"
-                }
-              </span>
-
-              <div
-                class="row"
-                style="margin-top:8px"
-              >
-
-                <button
-                  class="btn wa"
-                  onclick="quickWA('${p.id}')"
-                >
-                  واتساب
-                </button>
-
-                <button
-                  class="btn light"
-                  onclick="selectAI('${p.id}')"
-                >
-                  تحليل ذكي
-                </button>
-
-                <button
-                  class="btn gold"
-                  onclick="postMsg('${p.id}')"
-                >
-                  رضا بعد السفر
-                </button>
-
-                <button
-                  class="btn danger"
-                  onclick="delPerson('${p.id}')"
-                >
-                  حذف
-                </button>
-
-              </div>
-
-            </div>
-          `;
-
-        })
-        .join("")
-
-    : '<div class="empty">لا يوجد عملاء بعد.</div>';
+return names[type]||"النشاط التجاري";
 
 }
 
-/* الحجوزات */
 
-let tripsList =
-el("tripsList");
+/* =========================
+   اسم الهدف
+========================= */
 
-if (tripsList) {
+function goalName(type){
 
-tripsList.innerHTML =
-  db.trips.length
+const names={
 
-    ? db.trips
-        .slice()
-        .reverse()
-        .map(t => {
+customers:"جذب عملاء جدد",
 
-          let p =
-            db.people.find(
-              x => x.id === t.personId
-            );
+sales:"زيادة المبيعات",
 
-          return `
+launch:"إطلاق منتج أو خدمة",
 
-            <div class="item">
+trust:"بناء الثقة والسمعة",
 
-              <b>
-                ${esc(p?.name || "محذوف")}
-              </b>
+return:"استعادة العملاء السابقين",
 
-              <div class="muted">
-                ${esc(
-                  t.dest ||
-                  p?.dest ||
-                  "—"
-                )}
-                ·
-                ${esc(t.date || "—")}
-                ·
-                ${t.value || 0} ريال
-              </div>
+offer:"الإعلان عن عرض",
 
-            </div>
-          `;
+engagement:"زيادة التفاعل",
 
-        })
-        .join("")
+campaign:"حملة تسويقية كاملة"
 
-    : '<div class="empty">لا توجد حجوزات.</div>';
+};
+
+return names[type]||"تسويق عام";
 
 }
 
-/* ماذا أفعل اليوم */
 
-let list =
-db.people.filter(
-p =>
-!p.last ||
-daysUntilDue(p) <= 7 ||
-(!p.sat && p.last)
+/* =========================
+   فكرة تسويقية
+========================= */
+
+function generateIdea(d){
+
+let product=d.product||"الخدمة أو المنتج";
+
+let area=d.area||"المنطقة المستهدفة";
+
+let audience=d.audience||"العملاء المستهدفون";
+
+let goal=goalName(d.goal);
+
+return `حملة "${product}" موجهة إلى ${audience} في ${area} بهدف ${goal}.
+
+الفكرة الأساسية:
+نبدأ بمشكلة أو حاجة حقيقية لدى العميل، ثم نقدم ${product} باعتباره حلاً واضحاً وسهل الفهم، مع إبراز الميزة الأقوى والسبب الذي يجعل العميل يتواصل الآن.
+
+الرسالة التسويقية:
+لا نبيع المنتج فقط؛ بل نوضح للعميل ما الفائدة التي سيحصل عليها ولماذا يستحق أن يتخذ خطوة الآن.`;
+
+}
+
+
+/* =========================
+   نص الإعلان
+========================= */
+
+function generateAd(d){
+
+let product=d.product||"منتجنا / خدمتنا";
+
+let audience=d.audience||"عملائنا";
+
+let area=d.area||"منطقتك";
+
+let price=d.price;
+
+let info=d.info;
+
+let extra=price?
+`العرض الحالي: ${price}.`:"";
+
+return `✨ ${product}
+
+إذا كنت من ${audience} في ${area}، فهذه فرصة تستحق أن تعرفها.
+
+${info||"نقدم لك حلاً عملياً بجودة واهتمام وخدمة تساعدك على الوصول إلى ما تحتاجه بسهولة."}
+
+${extra}
+
+📩 تواصل معنا الآن لمعرفة التفاصيل.
+
+لا تؤجل قرارك إذا كانت الخدمة أو المنتج مناسباً لاحتياجك.`;
+
+}
+
+
+/* =========================
+   واتساب
+========================= */
+
+function generateWhatsApp(d){
+
+let product=d.product||"الخدمة أو المنتج";
+
+let price=d.price?
+` والعرض الحالي ${d.price}`:"";
+
+return `السلام عليكم 🌿
+
+لدينا ${product}${price}.
+
+إذا كان هذا الأمر يهمك أو لديك استفسار، يسعدنا أن نوضح لك التفاصيل ونساعدك في اختيار الأنسب لك.
+
+📩 تواصل معنا الآن.`;
+
+}
+
+
+/* =========================
+   وصف التصميم
+========================= */
+
+function generateDesignPrompt(d){
+
+let product=d.product||"المنتج أو الخدمة";
+
+let audience=d.audience||"الجمهور المستهدف";
+
+let area=d.area||"المنطقة";
+
+let info=d.info||"إظهار الميزة الرئيسية";
+
+return `تصميم إعلان احترافي باللغة العربية لـ "${product}".
+
+الجمهور المستهدف:
+${audience}
+
+المنطقة:
+${area}
+
+المعلومات الرئيسية:
+${info}
+
+التصميم يجب أن يكون:
+- واضحاً من النظرة الأولى.
+- مناسباً للإعلانات على الهاتف.
+- يبرز المنتج أو الخدمة بشكل رئيسي.
+- يحتوي على عنوان قصير قوي.
+- يحتوي على دعوة واضحة للتواصل.
+- بدون ازدحام في النصوص.
+- مظهر احترافي مناسب للنشاط.
+- ترك مساحة واضحة لإضافة رقم الهاتف ووسيلة التواصل.
+
+الفكرة البصرية:
+إظهار المنتج أو الخدمة في مركز التصميم مع عناصر بصرية مرتبطة بمجال النشاط، مع تسلسل بصري يقود العين من العنوان إلى الميزة ثم العرض ثم زر التواصل.`;
+
+}
+
+
+/* =========================
+   فكرة الفيديو
+========================= */
+
+function generateVideo(d){
+
+let product=d.product||"المنتج أو الخدمة";
+
+let goal=goalName(d.goal);
+
+return `فيديو قصير 15–30 ثانية عن "${product}".
+
+المشهد 1:
+سؤال أو مشكلة تجذب انتباه العميل في أول 3 ثوانٍ.
+
+المشهد 2:
+إظهار المنتج أو الخدمة كحل للمشكلة.
+
+المشهد 3:
+إظهار أهم ميزة أو عرض.
+
+المشهد 4:
+دعوة واضحة لاتخاذ الإجراء.
+
+الهدف:
+${goal}
+
+النهاية:
+"تواصل معنا الآن لمعرفة التفاصيل."`;
+
+}
+
+
+/* =========================
+   CTA
+========================= */
+
+function generateCTA(d){
+
+if(d.goal==="sales")
+return "اطلب الآن واستفد من العرض.";
+
+if(d.goal==="offer")
+return "تواصل معنا الآن قبل انتهاء العرض.";
+
+if(d.goal==="customers")
+return "اكتشف الخدمة المناسبة لك وتواصل معنا الآن.";
+
+if(d.goal==="return")
+return "اشتقنا لك — تواصل معنا لنجهز لك احتياجك القادم.";
+
+if(d.goal==="engagement")
+return "ما رأيك؟ أرسل لنا استفسارك وسنساعدك.";
+
+if(d.goal==="trust")
+return "اسألنا عن التفاصيل ودعنا نساعدك بثقة.";
+
+return "تواصل معنا الآن لمعرفة التفاصيل.";
+
+}
+
+
+/* =========================
+   إنشاء الحملة
+========================= */
+
+function runDesignAI(){
+
+let d=getDesignData();
+
+if(!d.product){
+
+return toast(
+"اكتب اسم المنتج أو الخدمة أولاً"
 );
 
-let worklist =
-el("worklist");
+}
 
-if (worklist) {
+let business=
+businessName(d.business);
 
-worklist.innerHTML =
-  list.length
+let idea=generateIdea(d);
 
-    ? list
-        .slice(0, 12)
-        .map(p => {
+let ad=generateAd(d);
 
-          let action =
-            !p.sat && p.last
-              ? "أرسل قياس رضا بعد السفر"
-              : reason(p).txt;
+let whatsapp=generateWhatsApp(d);
 
-          return `
+let design=generateDesignPrompt(d);
 
-            <div class="item">
+let video=generateVideo(d);
 
-              <b>
-                ${esc(p.name)}
-              </b>
+let cta=generateCTA(d);
 
-              <div class="muted">
-                ${esc(action)}
-              </div>
+let result=document.getElementById("designResult");
 
-              <button
-                class="btn wa"
-                style="margin-top:7px"
-                onclick="quickWA('${p.id}')"
-              >
-                ابدأ الإجراء
-              </button>
+result.innerHTML=`
 
-            </div>
-          `;
+<div class="card" style="background:#f8fafc">
 
-        })
-        .join("")
+<h2>🚀 الحملة جاهزة</h2>
 
-    : '<div class="empty">لا توجد إجراءات عاجلة.</div>';
+<div class="highlight">
+<b>المجال:</b> ${esc(business)}
+<br>
+<b>الهدف:</b> ${esc(goalName(d.goal))}
+<br>
+<b>نوع المحتوى:</b> ${esc(d.output)}
+</div>
+
+
+<div class="result-box">
+
+<h3>💡 الفكرة التسويقية</h3>
+
+<div class="result-text">
+${esc(idea)}
+</div>
+
+<button
+class="btn copy-btn"
+onclick="copyText(${JSON.stringify(idea)})">
+نسخ الفكرة
+</button>
+
+</div>
+
+
+<div class="result-box">
+
+<h3>📢 نص الإعلان</h3>
+
+<div class="result-text">
+${esc(ad)}
+</div>
+
+<button
+class="btn copy-btn"
+onclick="copyText(${JSON.stringify(ad)})">
+نسخ الإعلان
+</button>
+
+</div>
+
+
+<div class="result-box">
+
+<h3>💬 رسالة واتساب</h3>
+
+<div class="result-text">
+${esc(whatsapp)}
+</div>
+
+<button
+class="btn copy-btn"
+onclick="copyText(${JSON.stringify(whatsapp)})">
+نسخ رسالة واتساب
+</button>
+
+</div>
+
+
+<div class="result-box">
+
+<h3>🎨 وصف التصميم</h3>
+
+<div class="result-text">
+${esc(design)}
+</div>
+
+<button
+class="btn copy-btn"
+onclick="copyText(${JSON.stringify(design)})">
+نسخ وصف التصميم
+</button>
+
+</div>
+
+
+<div class="result-box">
+
+<h3>🎬 فكرة الفيديو</h3>
+
+<div class="result-text">
+${esc(video)}
+</div>
+
+<button
+class="btn copy-btn"
+onclick="copyText(${JSON.stringify(video)})">
+نسخ فكرة الفيديو
+</button>
+
+</div>
+
+
+<div class="result-box">
+
+<h3>📲 الدعوة إلى الإجراء CTA</h3>
+
+<div class="result-text">
+${esc(cta)}
+</div>
+
+<button
+class="btn copy-btn"
+onclick="copyText(${JSON.stringify(cta)})">
+نسخ CTA
+</button>
+
+</div>
+
+</div>
+
+`;
+
+toast("تم إنشاء الحملة");
 
 }
 
-/* الفرص */
 
-let opp =
-db.people
-.filter(
-p =>
-(
-p.last &&
-daysUntilDue(p) <= 30
-) ||
-(
-p.sat &&
-p.sat >= 4
-)
-)
-.slice(0, 8);
+/* =========================
+   نسخ نتائج الاستوديو
+========================= */
 
-let opportunities =
-el("opportunities");
+function copyText(text){
 
-if (opportunities) {
+if(navigator.clipboard){
 
-opportunities.innerHTML =
-  opp.length
+navigator.clipboard
+.writeText(text)
+.then(()=>{
+toast("تم النسخ");
+})
+.catch(()=>{
+fallbackCopy(text);
+});
 
-    ? opp
-        .map(p => `
+}else{
 
-          <div class="item">
-
-            <b>
-              ${esc(p.name)}
-            </b>
-
-            <div class="muted">
-              ${
-                daysUntilDue(p) <= 30
-                  ? "فرصة متابعة قريبة"
-                  : "عميل راضٍ يمكن بناء علاقة مستمرة معه"
-              }
-            </div>
-
-          </div>
-
-        `)
-        .join("")
-
-    : '<div class="empty">لا توجد فرص واضحة حاليًا.</div>';
+fallbackCopy(text);
 
 }
+
 }
 
-/* =========================================================
-تشغيل البرنامج
-========================================================= */
+
+function fallbackCopy(text){
+
+let area=document.createElement("textarea");
+
+area.value=text;
+
+document.body.appendChild(area);
+
+area.select();
+
+document.execCommand("copy");
+
+area.remove();
+
+toast("تم النسخ");
+
+}
+
+
+/* =========================
+   تشغيل البرنامج
+========================= */
 
 render();
 
-/* Service Worker */
+updateDesignAI();
 
-if ("serviceWorker" in navigator) {
+
+/* =========================
+   Service Worker
+========================= */
+
+if('serviceWorker' in navigator){
 
 window.addEventListener(
-"load",
-() => {
-
-  navigator.serviceWorker
-    .register("./sw.js")
-    .catch(() => {});
-
+'load',
+()=>{
+navigator.serviceWorker
+.register('./sw.js')
+.catch(()=>{});
 }
-
 );
+
 }
+
+</script>
+
+</body>
+</html>
